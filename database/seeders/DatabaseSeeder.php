@@ -12,18 +12,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
-
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
-         \App\Models\User::factory()->create([
-             'name' => 'John',
-             'last_name' => 'Doe',
-             'password' => 'password',
-             'email' => 'test@example.com',
-         ]);
+        $this->call([
+            UserSeeder::class,    // Important de le mettre avant les seeders qui utilisent User
+            CategorySeeder::class, // Important de le mettre avant PostSeeder
+            ProjectSeeder::class,
+            PostSeeder::class,
+            EventSeeder::class,
+            PartnerSeeder::class,
+            // Vous pourrez ajouter MediaItemSeeder ici si vous en créez un plus tard
+        ]);
     }
 }
