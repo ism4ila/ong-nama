@@ -1,4 +1,5 @@
 <?php
+// Fichier : database/migrations/2025_05_07_191911_create_projects_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -13,22 +14,23 @@ return new class extends Migration
     {
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
-            $table->json('title'); // Titre multilingue
-            $table->json('slug');  // Slug multilingue
-            $table->json('description_short')->nullable(); // Description courte multilingue
-            $table->text('content_full_raw')->nullable(); // Contenu détaillé (brut, la traduction sera gérée via le modèle)
-            $table->string('status')->default('planned'); // planned, ongoing, completed
-            $table->date('start_date')->nullable();
-            $table->date('end_date')->nullable();
-            $table->json('location_text')->nullable(); // Lieu texte multilingue
-            $table->decimal('latitude', 10, 7)->nullable();
-            $table->decimal('longitude', 10, 7)->nullable();
-            $table->string('featured_image')->nullable();
-            $table->boolean('is_featured')->default(false);
-            $table->timestamps();
+            $table->json('title'); // Titre traduisible
+            $table->json('slug'); // Slug traduisible
+            $table->json('description_short')->nullable(); // Description courte traduisible
+            $table->text('content_full_raw')->nullable(); // Contenu complet (peut-être Markdown ou HTML brut)
+            $table->string('status')->default('planned'); // Statut ('planned', 'ongoing', 'completed', etc.)
+            $table->date('start_date')->nullable(); // Date de début
+            $table->date('end_date')->nullable(); // Date de fin
+            $table->json('location_text')->nullable(); // Nom du lieu traduisible
+            $table->decimal('latitude', 10, 7)->nullable(); // Coordonnée GPS Latitude
+            $table->decimal('longitude', 10, 7)->nullable(); // Coordonnée GPS Longitude
+            $table->string('featured_image')->nullable(); // Chemin vers l'image principale (peut-être géré par medialibrary plus tard)
+            $table->boolean('is_featured')->default(false); // Pour marquer un projet comme "mis en avant"
+            // *** Ajout de la colonne is_active ici, SANS ->after() ***
+            $table->boolean('is_active')->default(true); // Pour contrôler la visibilité sur le site public
+            $table->timestamps(); // Ajoute created_at et updated_at
         });
     }
-    // La méthode down() devrait être : Schema::dropIfExists('projects');
 
     /**
      * Reverse the migrations.

@@ -16,9 +16,9 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,    // Important de le mettre avant les seeders qui utilisent User
             CategorySeeder::class, // Important de le mettre avant PostSeeder
             ProjectSeeder::class,
-            PostSeeder::class,
+            // PostSeeder::class,
             EventSeeder::class,
-            PartnerSeeder::class,
+            // PartnerSeeder::class,
             // Vous pourrez ajouter MediaItemSeeder ici si vous en créez un plus tard
         ]);
     }

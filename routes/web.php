@@ -13,6 +13,7 @@ use App\Http\Controllers\Frontend\ProjectController;
 use App\Http\Controllers\Frontend\PostController;
 use App\Http\Controllers\Frontend\EventController;
 use App\Http\Controllers\Frontend\PartnerController;
+use App\Http\Controllers\Frontend\HomeController as FrontendHomeController;
 
 // Pour la partie authentifiée
 use App\Http\Controllers\DashboardController; // <<< Ancien HomeController renommé
@@ -26,7 +27,9 @@ use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 */
 
 // --- ROUTES PUBLIQUES (FRONTEND) ---
-Route::get('/', [HomeController::class, 'index'])->name('home.public'); // <<< Page d'accueil publique
+// NOUVELLE ROUTE pour la page d'accueil publique
+Route::get('/', [FrontendHomeController::class, 'index'])->name('frontend.home');
+
 
 Route::get('/about', [AboutPageController::class, 'index'])->name('about.public');
 
