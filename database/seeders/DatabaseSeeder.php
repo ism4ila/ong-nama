@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,14 +13,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // L'ordre est important ici :
         $this->call([
-            UserSeeder::class,    // Important de le mettre avant les seeders qui utilisent User
-            CategorySeeder::class, // Important de le mettre avant PostSeeder
-            ProjectSeeder::class,
-            // PostSeeder::class,
-            EventSeeder::class,
-            // PartnerSeeder::class,
-            // Vous pourrez ajouter MediaItemSeeder ici si vous en créez un plus tard
+            UserSeeder::class,         // Créer les utilisateurs d'abord
+            CategorySeeder::class,     // Puis les catégories
+            ProjectSeeder::class,      // Ensuite les projets (indépendant pour l'instant)
+            EventSeeder::class,        // Les événements (indépendant)
+            PartnerSeeder::class,      // Les partenaires (indépendant)
+            PostSeeder::class,         // Les articles APRÈS Users et Categories
+            // MediaItemSeeder::class, // Ajoutez ceci plus tard si nécessaire
         ]);
     }
 }

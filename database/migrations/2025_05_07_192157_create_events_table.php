@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->id();
-            $table->json('title'); // Titre multilingue
-            $table->text('description_raw')->nullable(); // Description (brut)
-            $table->dateTime('start_datetime');
-            $table->dateTime('end_datetime')->nullable();
-            $table->json('location')->nullable(); // Lieu multilingue
+            $table->json('title'); // Champ traduisible
+            $table->json('description'); // Champ traduisible
+            $table->dateTime('start_datetime'); // Nom et type standardisés
+            $table->dateTime('end_datetime')->nullable(); // Nom et type standardisés
+            $table->json('location_text')->nullable(); // Champ traduisible pour le lieu
+            $table->string('featured_image_url')->nullable(); // Nom standardisé
             $table->timestamps();
         });
     }
-    // La méthode down() : Schema::dropIfExists('events');
 
     /**
      * Reverse the migrations.

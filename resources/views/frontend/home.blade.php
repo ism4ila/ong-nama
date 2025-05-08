@@ -1,189 +1,203 @@
-@extends('layouts.frontend') {{-- Utilise le layout créé --}}
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-@section('title', __('Accueil')) {{-- Définit le titre spécifique à cette page --}}
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
-@push('styles')
-{{-- Ajoutez ici des styles CSS spécifiques à la page d'accueil si nécessaire --}}
-<style>
-    .hero-section {
-        background: url('{{ asset('images/hero-background.jpg') }}') no-repeat center center; /* Image de fond Placeholder */
-        background-size: cover;
-        color: white;
-        padding: 150px 0;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.7);
-    }
-    .hero-section h1 {
-        font-size: 3.5rem;
-        font-weight: bold;
-    }
-    .project-card img, .post-card img {
-        height: 200px;
-        object-fit: cover; /* Assure que l'image couvre bien la zone */
-    }
-    .section-title {
-        margin-bottom: 40px;
-        font-weight: bold;
-        color: #333;
-    }
-    .cta-section {
-        background-color: #f8f9fa; /* Couleur de fond légère pour distinguer */
-        padding: 60px 0;
-    }
-    .partner-logo {
-        max-height: 60px;
-        filter: grayscale(100%);
-        opacity: 0.7;
-        transition: all 0.3s ease;
-    }
-    .partner-logo:hover {
-        filter: grayscale(0%);
-        opacity: 1;
-    }
-</style>
-@endpush
+    <title>{{ config('app.name', 'Nama') }} - {{ __('Accueil') }}</title>
 
-@section('content')
+    <link rel="dns-prefetch" href="//fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
-    {{-- 1. Section Héros --}}
-    <section class="hero-section text-center">
-        <div class="container">
-            <h1>{{ __('Nama : Bâtir l\'Espoir Ensemble') }}</h1>
-            <p class="lead my-4">{{ __('Agir pour l\'accès à l\'eau potable, l\'éducation et le développement durable des communautés.') }}</p>
-            <a href="#" class="btn btn-primary btn-lg">{{ __('Découvrir nos Projets') }}</a>
-            <a href="#" class="btn btn-outline-light btn-lg ms-2">{{ __('Faire un Don') }}</a>
-        </div>
-    </section>
+    {{-- Intégrer vos fichiers CSS compilés ici --}}
+    {{-- Exemple avec Vite: @vite(['resources/css/app.css', 'resources/js/app.js']) --}}
+     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"> {{-- Exemple CDN Bootstrap --}}
+     <link href="{{ asset('css/frontend.css') }}" rel="stylesheet"> {{-- Assurez-vous que ce fichier existe ou commentez/supprimez cette ligne --}}
 
-    {{-- 2. Section Introduction Rapide --}}
-    <section class="py-5">
-        <div class="container">
-             <h2 class="text-center section-title">{{ __('Notre Mission') }}</h2>
-            <div class="row align-items-center">
-                <div class="col-md-7">
-                    <p class="lead">{{ __('Nama est une organisation à but non lucratif engagée dans la réalisation de projets humanitaires durables.') }} {{ __('Nous croyons en la transparence, l\'impact direct et la collaboration pour construire un avenir meilleur pour tous.') }}</p>
-                    {{-- Ajouter plus de texte ou des éléments spécifiques ici --}}
-                    <a href="#" class="btn btn-outline-secondary">{{ __('En Savoir Plus sur Nama') }}</a>
-                </div>
-                <div class="col-md-5 text-center">
-                    {{-- Image illustrative ou chiffres clés --}}
-                    <img src="{{ asset('images/intro-image.png') }}" alt="{{ __('Illustration Mission Nama') }}" class="img-fluid rounded">
+    {{-- Styles spécifiques (si nécessaire plus tard) --}}
+    {{-- @stack('styles') --}}
+</head>
+<body>
+    <div id="app">
+        {{-- Section Navigation (simplifiée) --}}
+        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url('/') }}">
+                    {{ config('app.name', 'Nama') }}
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item"><a class="nav-link active" href="{{ url('/') }}">{{ __('Accueil') }}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">{{ __('À Propos') }}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">{{ __('Projets') }}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">{{ __('Actualités') }}</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">{{ __('Contact') }}</a></li>
+                    </ul>
+
+                    <ul class="navbar-nav ms-auto">
+                         <li class="nav-item dropdown">
+                            <a id="navbarDropdownLang" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                {{ strtoupper(app()->getLocale()) }}
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownLang">
+                                <a class="dropdown-item" href="#">FR</a>
+                                <a class="dropdown-item" href="#">AR</a>
+                            </div>
+                        </li>
+                         @guest
+                            @if (Route::has('login'))
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                                </li>
+                            @endif
+                        @else
+                             <li class="nav-item">
+                                <a class="nav-link" href="{{ route('admin.dashboard') }}">{{ __('Admin') }}</a>
+                             </li>
+                             <li class="nav-item">
+                                <a class="nav-link" href="{{ route('logout') }}"
+                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    {{ __('Logout') }}
+                                </a>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                    @csrf
+                                </form>
+                            </li>
+                        @endguest
+                    </ul>
                 </div>
             </div>
-        </div>
-    </section>
+        </nav>
 
-    {{-- 3. Section Projets Mis en Avant --}}
-    <section class="py-5 bg-light">
-        <div class="container">
-            <h2 class="text-center section-title">{{ __('Nos Actions Récentes') }}</h2>
-            <div class="row g-4">
-                @forelse($latestProjects as $project)
-                    <div class="col-md-4">
-                        <div class="card h-100 shadow-sm project-card">
-                            {{-- Image du projet (exemple avec le premier media item) --}}
-                            @if($project->mediaItems->first())
-                                <img src="{{ $project->mediaItems->first()->getUrl() }}" class="card-img-top" alt="{{ $project->mediaItems->first()->getCustomProperty('alt_text', $project->getTranslation('title', app()->getLocale())) }}">
-                            @else
-                                <img src="https://via.placeholder.com/350x200?text=Projet+Nama" class="card-img-top" alt="Image Placeholder"> {{-- Placeholder --}}
-                            @endif
+        {{-- Contenu principal de la page d'accueil --}}
+        <main class="py-4">
+            <div class="container">
 
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ $project->getTranslation('title', app()->getLocale()) }}</h5>
-                                <p class="card-text flex-grow-1">{{ Str::limit($project->getTranslation('description', app()->getLocale()), 100) }}</p>
-                                <a href="#" class="btn btn-sm btn-outline-primary align-self-start">{{ __('Voir le projet') }}</a>
+                {{-- Section Bannière/Hero --}}
+                <div class="row mb-4">
+                    <div class="col-12 text-center bg-light p-5 rounded">
+                        <h1>{{ __('Bienvenue à l\'Organisation Nama') }}</h1>
+                        <p>{{ __('Agir ensemble pour un avenir meilleur.') }}</p>
+                        <a href="#" class="btn btn-primary btn-lg">{{ __('Découvrir nos Projets') }}</a>
+                    </div>
+                </div>
+
+                {{-- Section Derniers Projets --}}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2>{{ __('Nos Derniers Projets') }}</h2>
+                        <hr>
+                    </div>
+                    @forelse ($latestProjects as $project)
+                        <div class="col-md-4 mb-3">
+                            <div class="card">
+                                <img src="{{ asset($project->featured_image_url ?? 'images/placeholder.jpg') }}" class="card-img-top" alt="{{ $project->title }}">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ $project->title }}</h5>
+                                    <p class="card-text">{{ Str::limit($project->description, 100) }}</p>
+                                    <p><small>{{ __('Statut:') }} {{ $project->status }}</small></p>
+                                    <a href="#" class="btn btn-sm btn-outline-primary">{{ __('En savoir plus') }}</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @empty
-                    <div class="col">
-                        <p class="text-center">{{ __('Aucun projet à afficher pour le moment.') }}</p>
-                    </div>
-                @endforelse
-            </div>
-            @if($latestProjects->count() > 0)
-            <div class="text-center mt-4">
-                 <a href="#" class="btn btn-secondary">{{ __('Explorer Tous Nos Projets') }}</a>
-            </div>
-            @endif
-        </div>
-    </section>
+                    @empty
+                        <div class="col-12">
+                            <p>{{ __('Aucun projet à afficher pour le moment.') }}</p>
+                        </div>
+                    @endforelse
+                </div>
 
-    {{-- 4. Section Actualités Récentes --}}
-    <section class="py-5">
-        <div class="container">
-             <h2 class="text-center section-title">{{ __('Dernières Actualités') }}</h2>
-             <div class="row g-4">
-                 @forelse($latestPosts as $post)
-                    <div class="col-md-4">
-                        <div class="card h-100 shadow-sm post-card">
-                             {{-- Image de l'article (si disponible) --}}
-                             @if($post->mediaItems->first())
-                                <img src="{{ $post->mediaItems->first()->getUrl('thumbnail') ?: $post->mediaItems->first()->getUrl() }}" class="card-img-top" alt="{{ $post->mediaItems->first()->getCustomProperty('alt_text', $post->getTranslation('title', app()->getLocale())) }}">
-                             @else
-                                <img src="https://via.placeholder.com/350x200?text=Actualité+Nama" class="card-img-top" alt="Image Placeholder"> {{-- Placeholder --}}
-                            @endif
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">{{ $post->getTranslation('title', app()->getLocale()) }}</h5>
-                                <p class="card-text text-muted small mb-2">
-                                    {{ __('Publié le') }} {{ $post->created_at->translatedFormat('d F Y') }}
-                                    {{-- @if($post->user)par {{ $post->user->name }}@endif --}}
-                                    {{-- {{ __('dans') }} <a href="#">{{ $post->category->getTranslation('name', app()->getLocale()) }}</a> --}} {{-- Ajouter lien catégorie plus tard --}}
-                                </p>
-                                <p class="card-text flex-grow-1">{{ Str::limit(strip_tags($post->getTranslation('body', app()->getLocale())), 120) }}</p> {{-- strip_tags pour enlever le HTML de l'extrait --}}
-                                <a href="#" class="btn btn-sm btn-outline-secondary align-self-start">{{ __('Lire la suite') }}</a>
+                {{-- Section Dernières Actualités --}}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2>{{ __('Dernières Actualités') }}</h2>
+                        <hr>
+                    </div>
+                    @forelse ($latestPosts as $post)
+                        <div class="col-md-4 mb-3">
+                             <div class="card">
+                                @if($post->featured_image_url)
+                                <img src="{{ asset($post->featured_image_url) }}" class="card-img-top" alt="{{ $post->title }}">
+                                @endif
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ $post->title }}</h5>
+                                    <p><small>{{ __('Publié le:') }} {{ $post->published_at->format('d/m/Y') }}</small></p>
+                                    <p class="card-text">{{ $post->excerpt ?? Str::limit(strip_tags($post->body), 120) }}</p>
+                                    <a href="#" class="btn btn-sm btn-outline-secondary">{{ __('Lire la suite') }}</a>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                @empty
-                     <div class="col">
-                        <p class="text-center">{{ __('Aucune actualité à afficher pour le moment.') }}</p>
-                    </div>
-                @endforelse
-             </div>
-             @if($latestPosts->count() > 0)
-             <div class="text-center mt-4">
-                  <a href="#" class="btn btn-secondary">{{ __('Toutes les Actualités') }}</a>
-             </div>
-             @endif
-        </div>
-    </section>
+                    @empty
+                        <div class="col-12">
+                            <p>{{ __('Aucune actualité à afficher pour le moment.') }}</p>
+                        </div>
+                    @endforelse
+                </div>
 
-     {{-- 5. Section Appel à l'Action Secondaire --}}
-    <section class="cta-section text-center">
-        <div class="container">
-            <h2>{{ __('Rejoignez Notre Cause') }}</h2>
-            <p class="lead my-4">{{ __('Chaque contribution, petite ou grande, nous aide à poursuivre nos actions sur le terrain.') }}</p>
-            <a href="#" class="btn btn-primary btn-lg">{{ __('Faire un Don') }}</a>
-            {{-- <a href="#" class="btn btn-outline-secondary btn-lg ms-2">{{ __('Devenir Bénévole') }}</a> --}} {{-- Si applicable --}}
-        </div>
-    </section>
+                 {{-- Section Événements à Venir --}}
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2>{{ __('Événements à Venir') }}</h2>
+                        <hr>
+                    </div>
+                    @forelse ($upcomingEvents as $event)
+                        <div class="col-md-4 mb-3">
+                             <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">{{ $event->title }}</h5>
+                                    <p><small>{{ __('Date:') }} {{ $event->start_datetime->format('d/m/Y H:i') }}</small></p>
+                                    <p class="card-text">{{ Str::limit($event->description, 100) }}</p>
+                                    <a href="#" class="btn btn-sm btn-outline-info">{{ __('Voir les détails') }}</a>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12">
+                            <p>{{ __('Aucun événement à venir pour le moment.') }}</p>
+                        </div>
+                    @endforelse
+                </div>
 
-    {{-- 6. Section Partenaires (Optionnel) --}}
-    @if($partners->count() > 0)
-    <section class="py-5">
-        <div class="container">
-            <h2 class="text-center section-title">{{ __('Ils Nous Font Confiance') }}</h2>
-            <div class="d-flex flex-wrap justify-content-center align-items-center gap-4">
-                 @foreach($partners as $partner)
-                    <a href="{{ $partner->website_url ?? '#' }}" target="_blank" rel="noopener noreferrer" title="{{ $partner->getTranslation('name', app()->getLocale()) }}">
-                        @if($partner->logo_path) {{-- Assurez-vous que 'logo_path' est le bon champ --}}
-                        <img src="{{ asset('storage/' . $partner->logo_path) }}" alt="{{ $partner->getTranslation('name', app()->getLocale()) }}" class="partner-logo">
-                         @else
-                        <span class="partner-name">{{ $partner->getTranslation('name', app()->getLocale()) }}</span> {{-- Fallback si pas de logo --}}
+                {{-- Section Partenaires --}}
+                <div class="row mb-4">
+                    <div class="col-12 text-center">
+                        <h2>{{ __('Nos Partenaires') }}</h2>
+                        <hr>
+                         @if ($partners->isNotEmpty())
+                            <div>
+                                @foreach ($partners as $partner)
+                                    <a href="{{ $partner->website_url ?? '#' }}" target="_blank" rel="noopener noreferrer" title="{{ $partner->name }}" class="d-inline-block m-2">
+                                        <img src="{{ asset($partner->logo_url) }}" alt="{{ $partner->name }}" style="max-height: 60px; max-width: 150px; object-fit: contain;">
+                                    </a>
+                                @endforeach
+                            </div>
+                        @else
+                            <p>{{ __('Nos partenaires seront bientôt affichés ici.') }}</p>
                         @endif
-                    </a>
-                 @endforeach
-            </div>
-        </div>
-    </section>
-    @endif
+                    </div>
+                </div>
 
-@endsection
+            </div> {{-- Fin container principal --}}
+        </main>
 
-@push('scripts')
-{{-- Ajoutez ici du JS spécifique à la page d'accueil si nécessaire --}}
-<script>
-    // Exemple : petite animation ou interaction JS
-    console.log("Page d'accueil chargée !");
-</script>
-@endpush
+        {{-- Section Footer (simplifiée) --}}
+        <footer class="container py-5">
+            <hr>
+            <p>&copy; {{ date('Y') }} {{ config('app.name', 'Nama') }}. {{ __('Tous droits réservés.') }}</p>
+        </footer>
+    </div> {{-- Fin div#app --}}
+
+    {{-- Intégrer vos fichiers JS compilés ici --}}
+     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script> {{-- Exemple CDN Bootstrap --}}
+     <script src="{{ asset('js/frontend.js') }}" defer></script> {{-- Assurez-vous que ce fichier existe ou commentez/supprimez cette ligne --}}
+
+    {{-- Scripts spécifiques (si nécessaire plus tard) --}}
+    {{-- @stack('scripts') --}}
+</body>
+</html>

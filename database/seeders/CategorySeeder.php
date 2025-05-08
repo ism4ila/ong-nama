@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Category; // Importer le modèle Category
+use App\Models\Category;
 
 class CategorySeeder extends Seeder
 {
@@ -13,39 +13,21 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
+        Category::query()->delete(); // Nettoyer avant de semer
+
         Category::create([
-            'name' => [
-                'fr' => 'Construction de Mosquées',
-                'ar' => 'بناء المساجد'
-            ],
-            'slug' => [
-                'fr' => 'construction-mosquees',
-                'ar' => 'بناء-المساجد'
-            ]
+            'name' => ['en' => 'News', 'fr' => 'Actualités', 'ar' => 'أخبار'],
+            'slug' => ['en' => 'news', 'fr' => 'actualites', 'ar' => 'akhbar']
         ]);
 
         Category::create([
-            'name' => [
-                'fr' => 'Forages de Puits',
-                'ar' => 'حفر الآبار'
-            ],
-            'slug' => [
-                'fr' => 'forages-puits',
-                'ar' => 'حفر-الآبار'
-            ]
+            'name' => ['en' => 'Projects', 'fr' => 'Projets', 'ar' => 'مشاريع'],
+            'slug' => ['en' => 'projects', 'fr' => 'projets', 'ar' => 'masharie']
         ]);
 
         Category::create([
-            'name' => [
-                'fr' => 'Complexes Islamiques',
-                'ar' => 'المجمعات الإسلامية'
-            ],
-            'slug' => [
-                'fr' => 'complexes-islamiques',
-                'ar' => 'المجمعات-الإسلامية'
-            ]
+            'name' => ['en' => 'Events', 'fr' => 'Événements', 'ar' => 'فعاليات'],
+            'slug' => ['en' => 'events', 'fr' => 'evenements', 'ar' => 'faaliat']
         ]);
-
-        // Vous pouvez ajouter d'autres catégories ici
     }
 }

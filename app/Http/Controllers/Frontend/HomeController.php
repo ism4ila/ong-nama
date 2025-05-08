@@ -4,47 +4,49 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Project;
-use App\Models\Post;
-use App\Models\Partner;
+use App\Models\Project;   // <-- Importer le modèle Project
+use App\Models\Post;      // <-- Importer le modèle Post
+use App\Models\Event;     // <-- Importer le modèle Event
+use App\Models\Partner;   // <-- Importer le modèle Partner
 
 class HomeController extends Controller
 {
     /**
      * Affiche la page d'accueil publique.
-     * Récupère les 3 derniers projets créés, les 3 derniers posts créés,
-     * et tous les partenaires triés par ordre d'affichage, sans filtre d'activité ou de publication.
      *
      * @return \Illuminate\Contracts\View\View
      */
     public function index()
     {
-        // Récupérer les 3 derniers projets créés (SANS condition 'is_active')
-        $latestProjects = Project::with('mediaItems')
-                                 // ->where('is_active', true) // Condition 'is_active' supprimée
-                                 ->latest()                 // Tri par date de création la plus récente
-                                 ->take(3)
-                                 ->get();
+        // 1. Récupérer les derniers projets (par exemple, les 3 plus récents)
+        $latestProjects = Project::latest() // Tri par created_at descendant
+                                   ->take(3)       // Limiter à 3 résultats
+                                   ->get();      // Exécuter la requête
 
-        // Récupérer les 3 derniers articles créés (SANS conditions de publication)
-        $latestPosts = Post::with(['user', 'category', 'mediaItems'])
-                           // ->whereNotNull('published_at')      // Condition de publication supprimée
-                           // ->where('published_at', '<=', now()) // Condition de publication supprimée
-                           ->latest()                          // Tri par date de création la plus récente (comportement par défaut de latest())
+        // 2. Récupérer les derniers articles publiés (par exemple, les 3 plus récents)
+        $latestPosts = Post::whereNotNull('published_at') // Seulement les articles publiés
+                           ->where('published_at', '<=', now()) // Date de publication passée ou présente
+                           ->latest('published_at') // Tri par date de publication descendante
                            ->take(3)
                            ->get();
 
-        // Récupérer TOUS les partenaires triés par ordre d'affichage (SANS condition 'is_active')
-        $partners = Partner::query() // On commence par query() pour pouvoir juste ordonner
-                           // ->where('is_active', true) // Condition 'is_active' supprimée
-                           ->orderBy('display_order', 'asc')
+        // 3. Récupérer les prochains événements (par exemple, les 3 plus proches)
+        $upcomingEvents = Event::where('start_datetime', '>=', now()) // Événements futurs ou en cours
+                               ->orderBy('start_datetime', 'asc')   // Tri par date de début ascendante
+                               ->take(3)
+                               ->get();
+
+        // 4. Récupérer les partenaires (par exemple, tous, triés par ordre d'affichage)
+        $partners = Partner::orderBy('display_order', 'asc') // Tri par display_order
                            ->get();
 
-        // Passer les données à la vue 'frontend.home'
+        // 5. Passer toutes les données récupérées à la vue
         return view('frontend.home', compact(
             'latestProjects',
             'latestPosts',
+            'upcomingEvents',
             'partners'
+            // Ajoutez d'autres variables si nécessaire
         ));
     }
 }

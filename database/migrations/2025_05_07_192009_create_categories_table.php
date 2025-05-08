@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->json('name'); // Nom de la catégorie multilingue
-            $table->json('slug'); // Slug multilingue
+            $table->json('name'); // Champ traduisible
+            $table->json('slug'); // Champ traduisible (unique par langue dans le modèle)
             $table->timestamps();
         });
     }
-    // La méthode down() : Schema::dropIfExists('categories');
 
     /**
      * Reverse the migrations.

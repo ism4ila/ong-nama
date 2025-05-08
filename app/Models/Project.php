@@ -4,49 +4,48 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Translatable\HasTranslations; // Importer le trait
+use Spatie\Translatable\HasTranslations; // Assurez-vous que cette ligne est présente
 
 class Project extends Model
 {
-    use HasFactory, HasTranslations; // Utiliser les traits
+    use HasFactory;
+    use HasTranslations; // Assurez-vous que cette ligne est présente
 
-    // Champs traduisibles
-    public $translatable = ['title', 'slug', 'description_short', 'content_full', 'location_text'];
-
-    // Champs autorisés à l'assignation de masse
+    /**
+     * Les attributs qui sont assignables en masse.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'title',
-        'slug',
-        'description_short',
-        'content_full',
+        'title',                 // Ajouté
+        'description',           // Ajouté
         'status',
         'start_date',
         'end_date',
-        'location_text',
-        'latitude',
-        'longitude',
-        'featured_image',
-        'is_featured',
+        'location_latitude',
+        'location_longitude',
+        'featured_image_url'
     ];
 
-    // Casts pour les types de données
+    /**
+     * Les attributs qui doivent être traduisibles.
+     *
+     * @var array<int, string>
+     */
+    public $translatable = ['title', 'description'];
+
+    /**
+     * Les attributs qui doivent être castés.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
-        'is_featured' => 'boolean',
         'start_date' => 'date',
         'end_date' => 'date',
-        'latitude' => 'decimal:7', // Préciser le nombre de décimales
-        'longitude' => 'decimal:7',
-        // Les champs JSON traduisibles sont gérés par le package, pas besoin de les caster en 'array' ici
+        'location_latitude' => 'decimal:7', // Conservez les casts existants
+        'location_longitude' => 'decimal:7',
+        // Ne pas caster les champs traduisibles ici, HasTranslations s'en charge
     ];
 
-    // Relation : Un projet peut avoir plusieurs éléments médias
-    public function mediaItems()
-    {
-        return $this->morphMany(MediaItem::class, 'model');
-    }
-    // Dans App\Models\Project.php
-    public function getRouteKeyName()
-    {
-        return 'slug'; // Indique à Laravel d'utiliser le champ 'slug' pour le binding
-    }
+    // Ajoutez ici d'autres relations ou méthodes si nécessaire
 }

@@ -4,12 +4,10 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Post;     // Importer le modèle Post
-use App\Models\Category; // Importer Category pour lier les posts
-use App\Models\User;     // Importer User pour lier l'auteur
-use Illuminate\Support\Str; // Pour générer les slugs
-use Carbon\Carbon;       // Pour manipuler les dates facilement
-use Illuminate\Support\Facades\Hash; // Importer Hash pour bcrypt
+use App\Models\Post;
+use App\Models\User;
+use App\Models\Category;
+use Carbon\Carbon;
 
 class PostSeeder extends Seeder
 {
@@ -18,84 +16,60 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        // Récupérer ou créer l'utilisateur auteur
-        $author = User::firstOrCreate(
-            ['email' => 'admin@nama.org'], // Critère pour le retrouver s'il existe
-            [ // Valeurs à utiliser S'IL FAUT LE CRÉER
-                // === MODIFIÉ ICI ===
-                // Assurez-vous que les noms de colonnes correspondent à votre migration users
-                'first_name' => 'Admin Nama',          // Gardez ceci si la colonne 'name' existe toujours
-                'last_name' => 'Admin',         // Ajoutez le prénom
-                'last_name' => 'Nama',           // Ajoutez le nom de famille (qui manquait)
-                'password' => Hash::make('password'), // Utilisez Hash::make (remplace bcrypt)
-                'email_verified_at' => now(),   // Optionnel : marquer l'email comme vérifié
-                // === FIN MODIFICATION ===
-            ]
-        );
+        Post::query()->delete(); // Nettoyer avant de semer
 
-        // Récupérer ou créer les catégories
-        $category1 = Category::firstOrCreate(
-            ['slug->fr' => 'actualites'],
-            [
-                'name' => ['fr' => 'Actualités', 'ar' => 'الأخبار'],
-                'slug' => ['fr' => 'actualites', 'ar' => 'alakhbar']
-            ]
-        );
-        $category2 = Category::firstOrCreate(
-            ['slug->fr' => 'rapports'],
-            [
-                'name' => ['fr' => 'Rapports', 'ar' => 'تقارير'],
-                'slug' => ['fr' => 'rapports', 'ar' => 'taqarir']
-            ]
-        );
+        // Récupérer un utilisateur admin et des catégories pour lier les posts
+        $adminUser = User::where('email', 'admin@ongnama.test')->first();
+        $newsCategory = Category::where('slug->en', 'news')->first(); // Recherche par slug anglais
+        $projectsCategory = Category::where('slug->en', 'projects')->first();
 
-        // --- Création des Posts (pas de changement ici) ---
+        if (!$adminUser || !$newsCategory || !$projectsCategory) {
+            $this->command->error('Admin user or categories not found. Run UserSeeder and CategorySeeder first.');
+            return;
+        }
+
         Post::create([
-            'category_id' => $category1->id,
-            'user_id' => $author->id,
-            'title' => ['fr' => 'Inauguration du Puits N°1', 'ar' => 'افتتاح البئر رقم 1'],
-            'slug' => ['fr' => 'inauguration-puits-1', 'ar' => 'iftitah-bier-1'],
-            'body' => ['fr' => 'Contenu détaillé de l\'article sur l\'inauguration du premier puits. C\'était un grand moment pour la communauté...', 'ar' => 'محتوى تفصيلي للمقال حول افتتاح البئر الأول. لقد كانت لحظة عظيمة للمجتمع ...'],
-            'featured_image_path' => 'posts/inauguration-puits.jpg', // Exemple
-            'published_at' => Carbon::parse('2024-04-25 10:00:00'),
-            'created_at' => now()->subDays(15),
-            'updated_at' => now()->subDays(14),
+            'category_id' => $newsCategory->id,
+            'user_id' => $adminUser->id,
+            'title' => [
+                'en' => 'Nama Organization Annual Report 2024',
+                'fr' => 'Rapport Annuel 2024 de l\'Organisation Nama',
+                'ar' => 'التقرير السنوي لمنظمة نما لعام 2024'
+            ],
+            'excerpt' => [
+                'en' => 'Summary of activities and achievements for the year 2024.',
+                'fr' => 'Résumé des activités et réalisations pour l\'année 2024.',
+                'ar' => 'ملخص الأنشطة والإنجازات لعام 2024.'
+            ],
+            'body' => [
+                'en' => 'Full content of the annual report...',
+                'fr' => 'Contenu complet du rapport annuel...',
+                'ar' => 'المحتوى الكامل للتقرير السنوي...'
+            ],
+            'featured_image_url' => '/images/posts/report2024.jpg', // Chemin exemple
+            'published_at' => Carbon::parse('2025-01-10 10:00:00'),
         ]);
 
         Post::create([
-            'category_id' => $category1->id,
-            'user_id' => $author->id,
-            'title' => ['fr' => 'Lancement Campagne Éducative', 'ar' => 'إطلاق الحملة التعليمية'],
-            'slug' => ['fr' => 'lancement-campagne-educative', 'ar' => 'itlaq-hamla-talimia'],
-            'body' => ['fr' => 'Nous sommes heureux d\'annoncer le lancement de notre nouvelle campagne éducative visant à soutenir les écoles locales.', 'ar' => 'يسرنا أن نعلن عن إطلاق حملتنا التعليمية الجديدة لدعم المدارس المحلية.'],
-            'featured_image_path' => null,
-            'published_at' => now()->subDay(),
-            'created_at' => now()->subDays(2),
-            'updated_at' => now()->subDays(1),
-        ]);
-
-         Post::create([
-            'category_id' => $category2->id,
-            'user_id' => $author->id,
-            'title' => ['fr' => 'Rapport Annuel 2024 (Brouillon)', 'ar' => 'التقرير السنوي 2024 (مسودة)'],
-            'slug' => ['fr' => 'rapport-annuel-2024-brouillon', 'ar' => 'taqrir-sanawi-2024-mosawada'],
-            'body' => ['fr' => 'Version préliminaire du rapport annuel, en attente de validation finale.', 'ar' => 'النسخة الأولية للتقرير السنوي ، بانتظار المصادقة النهائية.'],
-            'featured_image_path' => null,
-            'published_at' => null, // Brouillon
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-         Post::create([
-            'category_id' => $category1->id,
-            'user_id' => $author->id,
-            'title' => ['fr' => 'Prochain événement : Collecte de fonds', 'ar' => 'الحدث القادم: جمع التبرعات'],
-            'slug' => ['fr' => 'evenement-collecte-fonds-juin', 'ar' => 'hadath-jam3-tabaro3at-june'],
-            'body' => ['fr' => 'Annonce de notre prochaine collecte de fonds qui aura lieu le mois prochain. Plus de détails bientôt !', 'ar' => 'إعلان عن حملة جمع التبرعات القادمة التي ستعقد الشهر المقبل. المزيد من التفاصيل قريبا!'],
-            'featured_image_path' => null,
-            'published_at' => now()->addMonths(1), // Programmé
-            'created_at' => now()->subDay(),
-            'updated_at' => now()->subDay(),
+            'category_id' => $projectsCategory->id,
+            'user_id' => $adminUser->id,
+            'title' => [
+                'en' => 'Update on the Village X Mosque Project',
+                'fr' => 'Mise à jour sur le Projet Mosquée Village X',
+                'ar' => 'تحديث حول مشروع مسجد قرية X'
+            ],
+            'excerpt' => [
+                'en' => 'Latest progress on the construction work.',
+                'fr' => 'Dernières avancées sur les travaux de construction.',
+                'ar' => 'آخر التطورات في أعمال البناء.'
+            ],
+            'body' => [
+                'en' => 'Detailed update on the construction phases...',
+                'fr' => 'Mise à jour détaillée sur les phases de construction...',
+                'ar' => 'تحديث تفصيلي حول مراحل البناء...'
+            ],
+            'featured_image_url' => '/images/posts/mosque_update.jpg', // Chemin exemple
+            'published_at' => Carbon::parse('2025-03-20 15:30:00'),
         ]);
     }
 }

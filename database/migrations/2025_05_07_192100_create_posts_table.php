@@ -1,5 +1,4 @@
 <?php
-// Fichier: database/migrations/2025_05_07_192100_create_posts_table.php
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('category_id')->constrained()->onDelete('cascade'); // Clé étrangère vers categories
-            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Clé étrangère vers users (auteur)
-            $table->json('title'); // Titre traduisible
-            $table->json('slug'); // Slug traduisible
-            $table->json('body'); // Corps de l'article traduisible
-            $table->string('featured_image_path')->nullable(); // Chemin image (ou à gérer via medialibrary)
-            // Cette colonne détermine le statut de publication !
-            $table->timestamp('published_at')->nullable(); // Date et heure de publication (ou NULL si brouillon)
+            // Clé étrangère pour la catégorie (assurez-vous que la table 'categories' existe)
+            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+             // Clé étrangère pour l'utilisateur (auteur) (assurez-vous que la table 'users' existe)
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->json('title'); // Champ traduisible
+            $table->json('excerpt')->nullable(); // Champ traduisible
+            $table->json('body'); // Champ traduisible
+            $table->string('featured_image_url')->nullable(); // Nom standardisé
+            $table->timestamp('published_at')->nullable(); // Date de publication
             $table->timestamps(); // created_at et updated_at
         });
     }
