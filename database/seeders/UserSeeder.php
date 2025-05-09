@@ -20,17 +20,10 @@ class UserSeeder extends Seeder
             'name' => 'ISMAILA', // Prénom uniquement
             'last_name' => 'HAMADOU', // Ajout du nom de famille
             'email' => 'ismailahamadou5@gmail.com',
-            'password' => Hash::make('12345678'),
+            'password' => '12345678',
             'email_verified_at' => now(),
         ]);
 
-        // Vous pouvez créer d'autres utilisateurs si nécessaire
-        // User::create([
-        //     'name' => 'Auteur',
-        //     'last_name' => 'Test',
-        //     'email' => 'auteur@nama.org',
-        //     'password' => Hash::make('password123'),
-        //     'email_verified_at' => now(),
-        // ]);
+       
     }
 }

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->json('name'); // Champ traduisible
             $table->json('slug'); // Champ traduisible (unique par langue dans le modèle)
+            $table->json('description')->nullable();
             $table->timestamps();
         });
     }

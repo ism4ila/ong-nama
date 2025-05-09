@@ -13,16 +13,19 @@ return new class extends Migration
     {
         Schema::create('posts', function (Blueprint $table) {
             $table->id();
-            // Clé étrangère pour la catégorie (assurez-vous que la table 'categories' existe)
-            $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
-             // Clé étrangère pour l'utilisateur (auteur) (assurez-vous que la table 'users' existe)
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Auteur
+            $table->foreignId('category_id')->constrained()->onDelete('cascade'); // Catégorie
+
             $table->json('title'); // Champ traduisible
+            $table->json('slug');  // Champ traduisible
+            $table->json('body');  // Champ traduisible
             $table->json('excerpt')->nullable(); // Champ traduisible
-            $table->json('body'); // Champ traduisible
-            $table->string('featured_image_url')->nullable(); // Nom standardisé
-            $table->timestamp('published_at')->nullable(); // Date de publication
-            $table->timestamps(); // created_at et updated_at
+
+            $table->string('featured_image')->nullable();
+            $table->enum('status', ['published', 'draft', 'pending'])->default('draft');
+            $table->timestamp('published_at')->nullable();
+            
+            $table->timestamps();
         });
     }
 

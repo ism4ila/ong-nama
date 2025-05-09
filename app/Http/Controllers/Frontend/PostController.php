@@ -3,30 +3,75 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Post;
-use App\Models\Category; // Si vous voulez lister les catégories ou filtrer par catégorie
+use App\Models\Category; // Utile si tu veux afficher les catégories ou filtrer par catégorie
+use Illuminate\Http\Request;
 
 class PostController extends Controller
 {
-    // Afficher la liste des articles publiés
-    public function index()
+    /**
+     * Affiche la liste paginée des articles publiés.
+     *
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function index(Request $request)
     {
-        $posts = Post::whereNotNull('published_at')
-                     ->where('published_at', '<=', now()) // Uniquement les articles publiés
-                     ->latest()
-                     ->paginate(10);
-        $categories = Category::all(); // Pour un éventuel filtre ou une liste de catégories
-        return view('frontend.blog.index', compact('posts', 'categories')); // Vue: resources/views/frontend/blog/index.blade.php
+        $query = Post::with('user', 'category') // Charger les relations
+                       ->where('status', 'published')
+                       ->whereNotNull('published_at')
+                       ->where('published_at', '<=', now())
+                       ->latest('published_at');
+
+        // Optionnel : Filtrage par catégorie si un slug de catégorie est passé
+        if ($request->has('category')) {
+            $categorySlug = $request->query('category');
+            $query->whereHas('category', function ($q) use ($categorySlug) {
+                // Recherche du slug dans la colonne JSON pour la langue actuelle
+                $q->where("slug->".app()->getLocale(), $categorySlug)
+                  // Fallback si la traduction pour la locale actuelle n'existe pas, cherche dans la locale de secours
+                  ->orWhere("slug->".config('app.fallback_locale'), $categorySlug);
+            });
+        }
+        
+        $posts = $query->paginate(9); // Par exemple, 9 articles par page
+
+        // Récupérer toutes les catégories pour un éventuel filtre dans la vue
+        $categories = Category::orderBy('name->'.app()->getLocale())->get();
+
+
+        return view('frontend.posts.index', compact('posts', 'categories'));
     }
 
-    // Afficher un article spécifique
-    public function show(Post $post) // Route Model Binding
+    /**
+     * Affiche un article unique par son slug (traduit).
+     *
+     * @param  string  $slug
+     * @return \Illuminate\Contracts\View\View
+     */
+    public function show(string $slug)
     {
-        // Assurez-vous que seuls les articles publiés sont accessibles, ou gérez la logique ici
-        if (!$post->published_at || $post->published_at->isFuture()) {
-            abort(404);
-        }
-        return view('frontend.blog.show', compact('post')); // Vue: resources/views/frontend/blog/show.blade.php
+        // Recherche l'article par son slug dans la langue actuelle
+        // ou dans la langue de secours si non trouvé dans la langue actuelle.
+        $post = Post::where("slug->".app()->getLocale(), $slug)
+                    ->orWhere("slug->".config('app.fallback_locale'), $slug)
+                    ->where('status', 'published')
+                    ->whereNotNull('published_at')
+                    ->where('published_at', '<=', now())
+                    ->with('user', 'category') // Charger les relations
+                    ->firstOrFail();
+
+        // Optionnel : Récupérer des articles récents pour une sidebar "Articles récents"
+        $recentPosts = Post::where('id', '!=', $post->id) // Exclure l'article actuel
+                            ->where('status', 'published')
+                            ->whereNotNull('published_at')
+                            ->where('published_at', '<=', now())
+                            ->latest('published_at')
+                            ->take(5)
+                            ->get();
+                            
+        // Optionnel : Récupérer les catégories pour une sidebar "Catégories"
+        $categories = Category::orderBy('name->'.app()->getLocale())->get();
+
+        return view('frontend.posts.show', compact('post', 'recentPosts', 'categories'));
     }
 }

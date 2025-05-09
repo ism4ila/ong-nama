@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\Post;
 use App\Models\User;
 use App\Models\Category;
+use Illuminate\Support\Str;
 use Carbon\Carbon;
 
 class PostSeeder extends Seeder
@@ -16,60 +16,98 @@ class PostSeeder extends Seeder
      */
     public function run(): void
     {
-        Post::query()->delete(); // Nettoyer avant de semer
+        // Assure-toi d'avoir des utilisateurs et des catégories avant de lancer ce seeder
+        $users = User::all();
+        $categories = Category::all();
 
-        // Récupérer un utilisateur admin et des catégories pour lier les posts
-        $adminUser = User::where('email', 'admin@ongnama.test')->first();
-        $newsCategory = Category::where('slug->en', 'news')->first(); // Recherche par slug anglais
-        $projectsCategory = Category::where('slug->en', 'projects')->first();
-
-        if (!$adminUser || !$newsCategory || !$projectsCategory) {
-            $this->command->error('Admin user or categories not found. Run UserSeeder and CategorySeeder first.');
+        if ($users->isEmpty() || $categories->isEmpty()) {
+            $this->command->warn('Please seed Users and Categories before seeding Posts.');
             return;
         }
 
-        Post::create([
-            'category_id' => $newsCategory->id,
-            'user_id' => $adminUser->id,
-            'title' => [
-                'en' => 'Nama Organization Annual Report 2024',
-                'fr' => 'Rapport Annuel 2024 de l\'Organisation Nama',
-                'ar' => 'التقرير السنوي لمنظمة نما لعام 2024'
+        $posts = [
+            [
+                'user_id' => $users->random()->id,
+                'category_id' => $categories->random()->id,
+                'title' => [
+                    'en' => 'My First Laravel Post',
+                    'fr' => 'Mon Premier Article Laravel',
+                    'ar' => 'مقالتي الأولى في لارافيل',
+                ],
+                'body' => [
+                    'en' => 'This is the body of my first post in English. <strong>Laravel is awesome!</strong>',
+                    'fr' => 'Ceci est le corps de mon premier article en français. <strong>Laravel est génial !</strong>',
+                    'ar' => 'هذا هو محتوى مقالتي الأولى باللغة العربية. <strong>لارافيل رائع!</strong>',
+                ],
+                'excerpt' => [
+                    'en' => 'A short excerpt of the first post.',
+                    'fr' => 'Un court extrait du premier article.',
+                    'ar' => 'مقتطف قصير من المقالة الأولى.',
+                ],
+                'status' => 'published',
+                'published_at' => Carbon::now()->subDays(2),
             ],
-            'excerpt' => [
-                'en' => 'Summary of activities and achievements for the year 2024.',
-                'fr' => 'Résumé des activités et réalisations pour l\'année 2024.',
-                'ar' => 'ملخص الأنشطة والإنجازات لعام 2024.'
+            [
+                'user_id' => $users->random()->id,
+                'category_id' => $categories->random()->id,
+                'title' => [
+                    'en' => 'Understanding Eloquent Relationships',
+                    'fr' => 'Comprendre les Relations Eloquent',
+                    'ar' => 'فهم علاقات Eloquent',
+                ],
+                'body' => [
+                    'en' => 'Detailed explanation of Eloquent relationships: one-to-one, one-to-many, many-to-many, etc.',
+                    'fr' => 'Explication détaillée des relations Eloquent : un-à-un, un-à-plusieurs, plusieurs-à-plusieurs, etc.',
+                    'ar' => 'شرح مفصل لعلاقات Eloquent: واحد لواحد، واحد لكثير، كثير لكثير، إلخ.',
+                ],
+                'excerpt' => [
+                    'en' => 'Learn how to define and use Eloquent relationships in your Laravel project.',
+                    'fr' => 'Apprenez à définir et utiliser les relations Eloquent dans votre projet Laravel.',
+                    'ar' => 'تعلم كيفية تعريف واستخدام علاقات Eloquent في مشروع Laravel الخاص بك.',
+                ],
+                'status' => 'draft',
+                'published_at' => null,
             ],
-            'body' => [
-                'en' => 'Full content of the annual report...',
-                'fr' => 'Contenu complet du rapport annuel...',
-                'ar' => 'المحتوى الكامل للتقرير السنوي...'
-            ],
-            'featured_image_url' => '/images/posts/report2024.jpg', // Chemin exemple
-            'published_at' => Carbon::parse('2025-01-10 10:00:00'),
-        ]);
+            [
+                'user_id' => $users->random()->id,
+                'category_id' => $categories->random()->id,
+                'title' => [
+                    'en' => 'Tips for Multilingual Applications',
+                    'fr' => 'Conseils pour les Applications Multilingues',
+                    'ar' => 'نصائح للتطبيقات متعددة اللغات',
+                ],
+                'body' => [
+                    'en' => 'Best practices for building applications that support multiple languages.',
+                    'fr' => 'Meilleures pratiques pour construire des applications qui supportent plusieurs langues.',
+                    'ar' => 'أفضل الممارسات لبناء تطبيقات تدعم لغات متعددة.',
+                ],
+                'excerpt' => [
+                    'en' => 'Discover tips and tricks for localization and internationalization.',
+                    'fr' => 'Découvrez des trucs et astuces pour la localisation et l\'internationalisation.',
+                    'ar' => 'اكتشف النصائح والحيل للترجمة المحلية والدولية.',
+                ],
+                'status' => 'published',
+                'published_at' => Carbon::now(),
+            ]
+        ];
 
-        Post::create([
-            'category_id' => $projectsCategory->id,
-            'user_id' => $adminUser->id,
-            'title' => [
-                'en' => 'Update on the Village X Mosque Project',
-                'fr' => 'Mise à jour sur le Projet Mosquée Village X',
-                'ar' => 'تحديث حول مشروع مسجد قرية X'
-            ],
-            'excerpt' => [
-                'en' => 'Latest progress on the construction work.',
-                'fr' => 'Dernières avancées sur les travaux de construction.',
-                'ar' => 'آخر التطورات في أعمال البناء.'
-            ],
-            'body' => [
-                'en' => 'Detailed update on the construction phases...',
-                'fr' => 'Mise à jour détaillée sur les phases de construction...',
-                'ar' => 'تحديث تفصيلي حول مراحل البناء...'
-            ],
-            'featured_image_url' => '/images/posts/mosque_update.jpg', // Chemin exemple
-            'published_at' => Carbon::parse('2025-03-20 15:30:00'),
-        ]);
+        foreach ($posts as $postData) {
+            $slugs = [];
+            foreach ($postData['title'] as $locale => $title) {
+                $slugs[$locale] = Str::slug($title);
+            }
+
+            Post::create([
+                'user_id' => $postData['user_id'],
+                'category_id' => $postData['category_id'],
+                'title' => $postData['title'],
+                'slug' => $slugs,
+                'body' => $postData['body'],
+                'excerpt' => $postData['excerpt'] ?? null,
+                'status' => $postData['status'],
+                'published_at' => $postData['published_at'] ?? null,
+                // 'featured_image' => 'path/to/default/image.jpg', // Optionnel
+            ]);
+        }
     }
 }
