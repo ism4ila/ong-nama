@@ -23,14 +23,12 @@ class HomePageSetting extends Model
         'partners_title',
     ];
 
-    // Assurez-vous que la table n'aura qu'un seul enregistrement.
-    // Clé primaire simple 'id' est ok, mais votre logique doit assurer l'unicité.
     protected $fillable = [
         'hero_title',
         'hero_subtitle',
         'hero_button_text',
         'hero_button_link',
-        'hero_background_image',
+        'hero_background_image', // Chemin relatif à public/storage/
         'newsletter_title',
         'newsletter_text',
         'latest_projects_title',
@@ -39,28 +37,67 @@ class HomePageSetting extends Model
         'partners_title',
     ];
 
-    // Valeurs par défaut pour la création si la table est vide.
+    // Données par défaut enrichies
     protected static $defaultSettings = [
-        'hero_title' => ['en' => 'Welcome to NAMA Organization', 'fr' => 'Bienvenue à l\'Organisation Nama', 'ar' => 'مرحباً بكم في منظمة نما'],
-        'hero_subtitle' => ['en' => 'Acting together for a better future.', 'fr' => 'Agir ensemble pour un avenir meilleur.', 'ar' => 'نعمل معاً من أجل مستقبل أفضل.'],
-        'hero_button_text' => ['en' => 'Discover Our Projects', 'fr' => 'Découvrir nos Projets', 'ar' => 'اكتشف مشاريعنا'],
-        'hero_button_link' => '/projects', // Ou utilisez route('frontend.projects.index') si possible dans ce contexte
-        'newsletter_title' => ['en' => 'Stay informed of our activities', 'fr' => 'Restez informé de nos activités', 'ar' => 'ابق على اطلاع بأنشطتنا'],
-        'newsletter_text' => ['en' => 'Subscribe to our newsletter to receive the latest news and updates.', 'fr' => 'Inscrivez-vous à notre newsletter pour recevoir les dernières nouvelles et mises à jour.', 'ar' => 'اشترك في النشرة الإخبارية لدينا لتلقي آخر الأخبار والتحديثات.'],
-        'latest_projects_title' => ['en' => 'Our Latest Projects', 'fr' => 'Nos Derniers Projets', 'ar' => 'أحدث مشاريعنا'],
-        'latest_posts_title' => ['en' => 'Latest News', 'fr' => 'Dernières Actualités', 'ar' => 'آخر الأخبار'],
-        'upcoming_events_title' => ['en' => 'Upcoming Events', 'fr' => 'Événements à Venir', 'ar' => 'الأحداث القادمة'],
-        'partners_title' => ['en' => 'Our Partners', 'fr' => 'Nos Partenaires', 'ar' => 'شركاؤنا'],
+        'hero_title' => [
+            'fr' => 'Bienvenue à l\'Organisation NAMA', 
+            'en' => 'Welcome to NAMA Organization', 
+            'ar' => 'مرحباً بكم في منظمة نما للتنمية'
+        ],
+        'hero_subtitle' => [
+            'fr' => 'Ensemble, cultivons l\'espoir et bâtissons un avenir durable pour tous.', 
+            'en' => 'Together, let\'s cultivate hope and build a sustainable future for all.', 
+            'ar' => 'معًا، نزرع الأمل ونبني مستقبلًا مستدامًا للجميع.'
+        ],
+        'hero_button_text' => [
+            'fr' => 'Découvrez Nos Actions', 
+            'en' => 'Discover Our Actions', 
+            'ar' => 'اكتشفوا أعمالنا'
+        ],
+        'hero_button_link' => '/projects', // Ou un nom de route: 'frontend.projects.index'
+        'hero_background_image' => 'seeders/images/hero_background.jpg', // Exemple de chemin
+
+        'newsletter_title' => [
+            'fr' => 'Restez Connecté à Notre Mission', 
+            'en' => 'Stay Connected to Our Mission', 
+            'ar' => 'ابقوا على تواصل مع رسالتنا'
+        ],
+        'newsletter_text' => [
+            'fr' => 'Abonnez-vous à notre bulletin d\'information pour recevoir les dernières actualités sur nos projets et événements.', 
+            'en' => 'Subscribe to our newsletter to receive the latest updates on our projects and events.', 
+            'ar' => 'اشتركوا في نشرتنا الإخبارية لتلقي آخر التحديثات حول مشاريعنا وفعالياتنا.'
+        ],
+        'latest_projects_title' => [
+            'fr' => 'Nos Projets Récents', 
+            'en' => 'Our Recent Projects', 
+            'ar' => 'أحدث مشاريعنا التنموية'
+        ],
+        'latest_posts_title' => [
+            'fr' => 'Actualités de NAMA', 
+            'en' => 'NAMA News & Updates', 
+            'ar' => 'أخبار و مستجدات نما'
+        ],
+        'upcoming_events_title' => [
+            'fr' => 'Nos Événements à Venir', 
+            'en' => 'Our Upcoming Events', 
+            'ar' => 'فعالياتنا القادمة'
+        ],
+        'partners_title' => [
+            'fr' => 'Nos Précieux Partenaires', 
+            'en' => 'Our Valued Partners', 
+            'ar' => 'شركاؤنا الكرام'
+        ],
     ];
     
     public static function instance()
     {
-        // Crée ou récupère le premier enregistrement. S'assure qu'il n'y en a qu'un.
-        // Pour que firstOrCreate fonctionne bien avec les traductions,
-        // il est préférable de ne pas mettre les champs traduisibles dans le premier array.
         $settings = self::first();
         if (!$settings) {
             $settings = self::create(self::$defaultSettings);
+        } else {
+            // Optionnel: Mettre à jour avec les clés manquantes si le modèle $defaultSettings a été étendu
+            // $settings->fill(array_diff_key(self::$defaultSettings, $settings->getAttributes()));
+            // $settings->save();
         }
         return $settings;
     }
