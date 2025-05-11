@@ -17,11 +17,11 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserSeeder::class,
             CategorySeeder::class, // Exemple
-            // PostSeeder::class,
-            // ProjectSeeder::class,
-            // EventSeeder::class,
-            // PartnerSeeder::class,
-            // TeamMemberSeeder::class,
+            PostSeeder::class,
+            ProjectSeeder::class,
+            EventSeeder::class,
+            PartnerSeeder::class,
+            TeamMemberSeeder::class,
             // CommentSeeder::class,
 
             // Nouveaux Seeders

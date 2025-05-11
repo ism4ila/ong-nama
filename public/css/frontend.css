@@ -322,3 +322,270 @@
     }
 }
 /* FIN DES NOUVEAUX STYLES DÉPLACÉS */
+
+/* Styles pour la page d'accueil - Sections dynamiques */
+
+.homepage-content .home-section {
+    background-color: #fff; /* Fond blanc pour les sections sur le fond gris du body */
+    padding: 2.5rem 1.5rem; /* Espace intérieur pour les sections */
+    border-radius: 12px; /* Coins arrondis pour les sections */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07); /* Ombre douce pour les sections */
+}
+.homepage-content .home-section:nth-child(odd) { /* Alternance de fond si souhaité */
+    /* background-color: var(--light-gray); */ /* Exemple */
+}
+
+
+/* Styles pour les titres de section */
+.styled-title {
+    display: inline-block;
+    position: relative;
+    color: var(--secondary-color, #00796B); /* Couleur du titre */
+    font-weight: 700; /* Police plus grasse */
+    margin-bottom: 2rem !important; /* Espace en dessous */
+    padding-bottom: 0.75rem;
+    font-size: 2.2rem; /* Taille de police augmentée */
+}
+.styled-title span {
+    position: relative;
+    z-index: 1;
+}
+.styled-title::before { /* Ligne décorative principale */
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 0;
+    width: 100px; /* Largeur de la ligne */
+    height: 4px; /* Épaisseur de la ligne */
+    background-color: var(--primary-color, #26A69A); /* Couleur de la ligne */
+    border-radius: 2px;
+}
+.styled-title::after { /* Ligne décorative secondaire plus courte */
+    content: "";
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -8px; /* Positionnée sous la première ligne */
+    width: 50px;
+    height: 3px;
+    background-color: var(--accent-color, #80CBC4);
+    border-radius: 2px;
+    opacity: 0.7;
+}
+[dir="rtl"] .styled-title::before,
+[dir="rtl"] .styled-title::after {
+    left: auto;
+    right: 50%;
+    transform: translateX(50%);
+}
+
+
+/* Styles pour les cartes (général, puis spécifique par type) */
+.card { /* Styles de base déjà présents, on affine */
+    border: none;
+    border-radius: 10px; /* Coins légèrement moins arrondis que la section */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    overflow: hidden; /* Important pour les images et badges */
+}
+.card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(var(--secondary-color-rgb, 0, 121, 107), 0.15);
+}
+
+.card-image-link {
+    display: block;
+    text-decoration: none;
+}
+.card-image-container {
+    position: relative;
+    height: 220px; /* Hauteur fixe pour toutes les images de carte */
+    background-color: #f0f0f0; /* Couleur de fond si l'image est manquante */
+    overflow: hidden;
+}
+.card-image-container .card-img-top {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Assure que l'image couvre bien, peut couper des parties */
+    transition: transform 0.4s ease;
+}
+.card:hover .card-image-container .card-img-top {
+    transform: scale(1.08); /* Effet de zoom subtil au survol */
+}
+
+.card-body {
+    padding: 1.25rem; /* Padding standard pour le corps de la carte */
+}
+.card-title { /* Styles généraux pour les titres de cartes */
+    font-weight: 600;
+    font-size: 1.15rem; /* Légèrement réduit pour plus d'élégance */
+    margin-bottom: 0.5rem;
+}
+.card-title a {
+    text-decoration: none;
+    color: var(--secondary-color, #00796B);
+    transition: color 0.3s ease;
+}
+.card-title a:hover {
+    color: var(--primary-color, #26A69A);
+}
+.card-date, .card-details {
+    font-size: 0.8rem;
+    color: #777;
+}
+.card-excerpt {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--dark-gray, #546E7A);
+    margin-bottom: 1rem; /* Espace avant le bouton */
+}
+
+/* Badges sur les images */
+.card-status-badge, .card-category-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 0.75rem;
+    padding: 0.3em 0.6em;
+    border-radius: 4px;
+    color: #fff;
+    z-index: 2;
+}
+.card-status-badge { /* Pour les projets */
+    background-color: rgba(var(--primary-color-rgb, 38, 166, 154), 0.9);
+}
+.card-category-badge { /* Pour les articles */
+    background-color: rgba(var(--secondary-color-rgb, 0, 121, 107), 0.85);
+    left: auto; /* Le positionner à droite pour varier */
+    right: 10px;
+}
+[dir="rtl"] .card-status-badge { left: auto; right: 10px; }
+[dir="rtl"] .card-category-badge { right: auto; left: 10px; }
+
+
+/* Spécifique pour les cartes d'événements */
+.event-card .card-image-container {
+    display: flex; /* Pour centrer l'icône placeholder */
+    align-items: center;
+    justify-content: center;
+}
+.card-event-date-badge {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    color: var(--primary-color, #26A69A);
+    padding: 8px 12px;
+    border-radius: 6px;
+    text-align: center;
+    line-height: 1.1;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    z-index: 2;
+}
+.card-event-date-badge .day {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+.card-event-date-badge .month {
+    display: block;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+.card-event-date-badge .year {
+    display: block;
+    font-size: 0.7rem;
+    color: #777;
+}
+[dir="rtl"] .card-event-date-badge { right: auto; left: 10px; }
+
+/* Section Partenaires */
+.partners-section {
+    background-color: var(--light-gray, #F5F7F8); /* Fond légèrement différent pour cette section */
+}
+.partner-logo-item {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.partner-logo-item img {
+    max-height: 70px; /* Hauteur max pour les logos */
+    width: auto; /* Garder les proportions */
+    filter: grayscale(80%); /* Moins gris par défaut */
+    opacity: 0.8;
+    margin: 0 auto; /* Centrer l'image si la colonne est plus large */
+    transition: all 0.3s ease;
+}
+.partner-logo-item:hover img {
+    filter: grayscale(0%);
+    opacity: 1;
+    transform: scale(1.1);
+}
+
+/* Section Newsletter (amélioration des styles existants si besoin) */
+
+.newsletter-icon i {
+    font-size: 2.5rem !important; /* S'assurer que la taille est correcte */
+    color: var(--primary-color, #26A69A) !important;
+}
+.newsletter-title {
+    font-weight: 600;
+    color: var(--secondary-color, #00796B);
+    margin-bottom: 0.75rem; /* Un peu moins d'espace */
+}
+.newsletter-text {
+    font-size: 1rem;
+    color: var(--dark-gray, #546E7A);
+}
+.newsletter-form-inline .form-control-lg {
+    padding: 0.75rem 1.25rem; /* Ajuster le padding pour btn-lg */
+}
+.newsletter-form-inline .btn-lg {
+    padding: 0.75rem 1.5rem; /* Cohérence du padding */
+}
+
+
+/* Styles pour le Hero Section (affinage) */
+.hero-section {
+    padding: 5rem 1rem; /* Plus de padding vertical */
+    /* background-image géré dynamiquement */
+    background-size: cover;
+    background-position: center center; /* Mieux centrer */
+    border-radius: 15px; /* Cohérence avec les sections */
+    /* box-shadow: 0 10px 30px rgba(0,0,0,0.05); Déjà présent */
+}
+.hero-title {
+    font-size: clamp(2rem, 5vw, 3.2rem); /* Taille de police responsive */
+    color: var(--secondary-color, #00796B);
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+.hero-subtitle {
+    font-size: clamp(1rem, 2.5vw, 1.4rem); /* Taille de police responsive */
+    color: var(--dark-gray, #546E7A);
+    margin-bottom: 2.5rem;
+}
+.hero-button.btn-lg { /* Style spécifique pour le bouton du hero */
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+    box-shadow: 0 5px 15px rgba(var(--primary-color-rgb, 38,166,154), 0.35);
+}
+.hero-button.btn-lg:hover {
+    box-shadow: 0 8px 20px rgba(var(--primary-color-rgb, 38,166,154), 0.45);
+    transform: translateY(-3px);
+}
+
+/* Utilitaires (si non déjà présents) */
+.text-decoration-none { text-decoration: none !important; }
+.align-self-start { align-self: flex-start !important; }
+
+/* Responsive pour les cartes dans les sections */
+@media (max-width: 767.98px) {
+    .home-section .card {
+        margin-bottom: 1.5rem; /* Espace entre les cartes sur mobile */
+    }
+    .styled-title {
+        font-size: 1.8rem; /* Titres de section plus petits sur mobile */
+    }
+     .newsletter-form-inline .btn-lg {
+        margin-top: 0.5rem; /* Espace pour le bouton sous l'input sur mobile */
+    }
+}

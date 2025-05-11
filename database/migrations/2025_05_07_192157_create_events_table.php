@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->json('title'); // Champ traduisible
+            $table->json('slug')->unique();
             $table->json('description'); // Champ traduisible
             $table->dateTime('start_datetime'); // Nom et type standardisés
             $table->dateTime('end_datetime')->nullable(); // Nom et type standardisés

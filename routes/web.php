@@ -50,12 +50,15 @@ Route::group(['middleware' => ['web', 'set_locale']], function () {
 
     // Partenaires (si une page dédiée existe)
     // Route::get('/partners', [FrontendPartnerController::class, 'index'])->name('frontend.partners.index');
-    
+
     // Contact (si vous utilisez un contrôleur pour la page de contact)
     Route::get('/contact', [FrontendContactController::class, 'index'])->name('frontend.contact.index');
     Route::post('/contact', [FrontendContactController::class, 'store'])->name('frontend.contact.store');
-
-
+    // Dans routes/web.php, à l'intérieur du groupe SetLocale
+    // Événements - CORRIGÉ : une seule définition de route
+    // Événements - CORRIGÉ
+    Route::get('/events', [FrontendEventController::class, 'index'])->name('frontend.events.index');
+    Route::get('/events/{event_slug}', [FrontendEventController::class, 'show'])->name('frontend.events.show');
     // Route pour "À Propos" - sera gérée par PageController si 'about' est un slug dans la table Pages
     // Si vous voulez garder un contrôleur dédié pour /about :
     // Route::get('/about', [FrontendAboutPageController::class, 'index'])->name('frontend.about');
@@ -63,8 +66,8 @@ Route::group(['middleware' => ['web', 'set_locale']], function () {
     // Route pour les PAGES DYNAMIQUES (IMPORTANT: doit être déclarée APRÈS les autres routes plus spécifiques)
     // Elle essaiera de trouver une page correspondant au slug.
     Route::get('/{slug}', [FrontendPageController::class, 'show'])
-         ->where('slug', '^[a-zA-Z0-9_\-\/]+$') // Permet les slugs avec des / pour des sous-pages simples. Ajustez si besoin.
-         ->name('frontend.page.show');
+        ->where('slug', '^[a-zA-Z0-9_\-\/]+$') // Permet les slugs avec des / pour des sous-pages simples. Ajustez si besoin.
+        ->name('frontend.page.show');
 });
 
 
@@ -88,27 +91,27 @@ Route::middleware(['auth', 'verified', 'set_locale'])->group(function () { // 'v
     // Le préfixe 'admin' et le nom 'admin.' sont déjà là.
     // Assurez-vous que les contrôleurs Admin existent et sont correctement namespacés.
     Route::prefix('admin')
-          ->name('admin.')
-          // ->middleware('isAdmin') // Décommentez et créez ce middleware pour la sécurité de l'admin
-          ->group(function () {
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-        
-        // Ressources pour l'administration
-        // Assurez-vous que ces contrôleurs sont dans App\Http\Controllers\Admin
-        Route::resource('categories', AdminCategoryController::class);
-        Route::resource('posts', AdminPostController::class);
-        // Route::resource('projects', AdminProjectController::class); // À créer
-        // Route::resource('events', AdminEventController::class);     // À créer
-        // Route::resource('pages', AdminPageController::class);       // À créer
-        // Route::resource('partners', AdminPartnerController::class); // À créer
-        // Route::resource('users', AdminUserController::class);       // À créer pour gérer les utilisateurs
+        ->name('admin.')
+        // ->middleware('isAdmin') // Décommentez et créez ce middleware pour la sécurité de l'admin
+        ->group(function () {
+            Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-        // Route pour les paramètres du site et de la page d'accueil (exemple)
-        // Route::get('/settings/homepage', [AdminHomepageSettingsController::class, 'edit'])->name('settings.homepage.edit');
-        // Route::put('/settings/homepage', [AdminHomepageSettingsController::class, 'update'])->name('settings.homepage.update');
-        // Route::get('/settings/site', [AdminSiteSettingsController::class, 'edit'])->name('settings.site.edit');
-        // Route::put('/settings/site', [AdminSiteSettingsController::class, 'update'])->name('settings.site.update');
-    });
+            // Ressources pour l'administration
+            // Assurez-vous que ces contrôleurs sont dans App\Http\Controllers\Admin
+            Route::resource('categories', AdminCategoryController::class);
+            Route::resource('posts', AdminPostController::class);
+            // Route::resource('projects', AdminProjectController::class); // À créer
+            // Route::resource('events', AdminEventController::class);     // À créer
+            // Route::resource('pages', AdminPageController::class);       // À créer
+            // Route::resource('partners', AdminPartnerController::class); // À créer
+            // Route::resource('users', AdminUserController::class);       // À créer pour gérer les utilisateurs
+
+            // Route pour les paramètres du site et de la page d'accueil (exemple)
+            // Route::get('/settings/homepage', [AdminHomepageSettingsController::class, 'edit'])->name('settings.homepage.edit');
+            // Route::put('/settings/homepage', [AdminHomepageSettingsController::class, 'update'])->name('settings.homepage.update');
+            // Route::get('/settings/site', [AdminSiteSettingsController::class, 'edit'])->name('settings.site.edit');
+            // Route::put('/settings/site', [AdminSiteSettingsController::class, 'update'])->name('settings.site.update');
+        });
 
     // L'ancienne route Route::get('/about', function () { return view('about'); })->name('about');
     // sous middleware 'auth' est probablement une erreur ou une page "about" spécifique à l'utilisateur connecté.
