@@ -61,6 +61,14 @@
                     <span>{{ __('Posts') }}</span> {{-- Assure-toi d'avoir la clé "Posts" dans tes fichiers lang --}}
                 </a>
             </li>
+            @if(Route::has('admin.events.index')) {{-- Cette route a été créée --}}
+            <li class="nav-item {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.events.index') }}">
+                    <i class="fas fa-fw fa-calendar-alt"></i>
+                    <span>Événements</span>
+                </a>
+            </li>
+            @endif
             <!-- Divider -->
             <hr class="sidebar-divider">
 

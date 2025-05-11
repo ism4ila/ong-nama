@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Frontend;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 
-class FrontendEventController extends Controller
+class EventController extends Controller
 {
     public function index()
     {

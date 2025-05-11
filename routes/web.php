@@ -12,6 +12,7 @@ use App\Http\Controllers\Frontend\EventController as FrontendEventController;
 use App\Http\Controllers\Frontend\PartnerController as FrontendPartnerController; // Si vous avez une page listant les partenaires
 use App\Http\Controllers\Frontend\PageController as FrontendPageController; // Pour les pages dynamiques
 use App\Http\Controllers\Frontend\ContactController as FrontendContactController; // Pour le formulaire de contact
+use App\Http\Controllers\Admin\EventController as AdminEventController; 
 
 // --- Contrôleurs Backend/Authentification ---
 use App\Http\Controllers\DashboardController; // Pour le tableau de bord utilisateur après login (/home)
@@ -20,6 +21,9 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController; // Assurez-vous que le namespace est correct
 use App\Http\Controllers\Admin\PostController as AdminPostController;       // Assurez-vous que le namespace est correct
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\PostController;
+
 // Ajoutez ici les autres contrôleurs Admin (Project, Event, Page, Settings etc.)
 
 /*
@@ -77,44 +81,39 @@ Route::group(['middleware' => ['web', 'set_locale']], function () {
 Auth::routes(['verify' => true]); // 'verify' => true active la vérification d'email si vous l'utilisez.
 
 
-// --- ROUTES POUR UTILISATEURS AUTHENTIFIÉS (standard & admin) ---
-Route::middleware(['auth', 'verified', 'set_locale'])->group(function () { // 'verified' assure que l'email est vérifié
+Route::middleware(['auth', 'verified', 'set_locale'])->group(function () {
 
-    // Tableau de bord standard pour utilisateur connecté
+    // Tableau de bord standard pour utilisateur connecté (route /home)
     Route::get('/home', [DashboardController::class, 'index'])->name('home');
 
     // Profil utilisateur
-    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index'); // Suivre la convention .index
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    // --- ROUTES POUR L'ADMINISTRATION ---
-    // Le préfixe 'admin' et le nom 'admin.' sont déjà là.
-    // Assurez-vous que les contrôleurs Admin existent et sont correctement namespacés.
+    // --- ROUTES POUR L'ADMINISTRATION (SB Admin) ---
+    // Le préfixe 'admin' assure que ces routes ne sont pas confondues avec les routes publiques.
     Route::prefix('admin')
-        ->name('admin.')
-        // ->middleware('isAdmin') // Décommentez et créez ce middleware pour la sécurité de l'admin
-        ->group(function () {
-            Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
-
-            // Ressources pour l'administration
-            // Assurez-vous que ces contrôleurs sont dans App\Http\Controllers\Admin
-            Route::resource('categories', AdminCategoryController::class);
-            Route::resource('posts', AdminPostController::class);
-            // Route::resource('projects', AdminProjectController::class); // À créer
-            // Route::resource('events', AdminEventController::class);     // À créer
-            // Route::resource('pages', AdminPageController::class);       // À créer
-            // Route::resource('partners', AdminPartnerController::class); // À créer
-            // Route::resource('users', AdminUserController::class);       // À créer pour gérer les utilisateurs
-
-            // Route pour les paramètres du site et de la page d'accueil (exemple)
-            // Route::get('/settings/homepage', [AdminHomepageSettingsController::class, 'edit'])->name('settings.homepage.edit');
-            // Route::put('/settings/homepage', [AdminHomepageSettingsController::class, 'update'])->name('settings.homepage.update');
-            // Route::get('/settings/site', [AdminSiteSettingsController::class, 'edit'])->name('settings.site.edit');
-            // Route::put('/settings/site', [AdminSiteSettingsController::class, 'update'])->name('settings.site.update');
-        });
-
-    // L'ancienne route Route::get('/about', function () { return view('about'); })->name('about');
-    // sous middleware 'auth' est probablement une erreur ou une page "about" spécifique à l'utilisateur connecté.
-    // Si c'est une page admin, elle devrait être dans le groupe admin.
-    // Si c'est une page publique, elle est gérée par le PageController ou FrontendAboutPageController.
+          ->name('admin.') // Préfixe pour les noms de route: admin.dashboard, admin.posts.index, etc.
+          // ->middleware('isAdmin') // À décommenter et implémenter pour la sécurité
+          ->group(function () {
+        
+        // Tableau de bord Admin
+        // Assurez-vous que App\Http\Controllers\Admin\DashboardController existe et a une méthode index.
+        Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        
+        // Ressources CRUD Admin
+        Route::resource('categories', CategoryController::class); // Venait de votre code original
+        
+        // Pour les posts admin, assurez-vous que AdminPostController est celui que vous voulez utiliser
+        // Si App\Http\Controllers\PostController était pour l'admin dans votre code original,
+        // il faudrait l'importer avec l'alias AdminPostController ou créer le contrôleur Admin\PostController.
+        Route::resource('posts', PostController::class); 
+        
+        Route::resource('events', AdminEventController::class);
+        
+        // Ajoutez ici les routes pour les autres CRUDs admin (projets, pages, etc.)
+        // Route::resource('projects', AdminProjectController::class);
+        // Route::resource('pages', AdminPageController::class);
+        // ... etc.
+    });
 });

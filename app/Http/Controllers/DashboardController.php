@@ -1,37 +1,21 @@
 <?php
 
-namespace App\Http\Controllers; // Gardez ce namespace
+namespace App\Http\Controllers; // Namespace correct
 
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class DashboardController extends Controller // <<< Changez ici
+class DashboardController extends Controller // Nom de classe correct
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth'); // Applique le middleware auth à toutes les méthodes
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function index()
     {
         $users = User::count();
-
-        $widget = [
-            'users' => $users,
-            //...
-        ];
-
-        // La vue 'home' est le tableau de bord des utilisateurs connectés
-        return view('home', compact('widget'));
+        $widget = ['users' => $users];
+        return view('home', compact('widget')); // Retourne la vue 'home.blade.php'
     }
 }
