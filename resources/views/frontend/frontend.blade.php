@@ -1,176 +1,261 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() == 'ar' ? 'rtl' : 'ltr' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ $siteSettingsGlobal->getDirection(app()->getLocale()) ?? (app()->getLocale() == 'ar' ? 'rtl' : 'ltr') }}"> {{-- Ajout d'une méthode getDirection au modèle SiteSetting pour plus de flexibilité --}}
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Organisation Nama - Agir ensemble pour un avenir meilleur">
+    <meta name="description" content="@yield('meta_description', $siteSettingsGlobal->getTranslation('footer_description', app()->getLocale(), config('app.description', 'Organisation Nama - Agir ensemble pour un avenir meilleur')))">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', config('app.name', 'Nama'))</title>
+    <title>@yield('title', $siteSettingsGlobal->getTranslation('site_name', app()->getLocale()) ?? config('app.name', 'Nama'))</title>
+
+    @if($siteSettingsGlobal->favicon)
+    <link rel="icon" href="{{ Storage::url($siteSettingsGlobal->favicon) }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ Storage::url($siteSettingsGlobal->favicon) }}" type="image/x-icon">
+    @endif
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {{-- Police Poppins et Cairo --}}
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> {{-- Assurez-vous que cette version est à jour --}}
     
+    {{-- Bootstrap CSS --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    @if (app()->getLocale() == 'ar')
+    @if (app()->getLocale() == 'ar') {{-- Ou utilisez $siteSettingsGlobal->getDirection() --}}
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
     @endif
-    <link href="{{ asset('css/frontend.css') }}" rel="stylesheet"> {{-- Ton CSS principal pour le frontend --}}
+    
+    <link href="{{ asset('css/frontend.css') }}" rel="stylesheet"> {{-- Votre CSS principal --}}
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" /> {{-- AOS pour animations au scroll --}}
 
-    {{-- Styles spécifiques à la page --}}
+
+    {{-- Styles spécifiques à la page (poussés par les vues enfants) --}}
     @stack('styles_frontend')
 
     <style>
+        /* Variables CSS Globales (si non définies dans frontend.css) */
         :root {
-            --primary-color: #4CAF50; /* Vert principal */
-            --secondary-color: #2E7D32; /* Vert plus foncé */
-            --accent-color: #8BC34A; /* Vert clair accent */
-            --text-color: #374151; /* Gris foncé pour texte */
-            --light-gray: #F1F8E9; /* Gris très clair pour fonds */
-            --dark-gray: #4B5563; /* Gris moyen pour texte secondaire */
+            --primary-color: {{ $siteSettingsGlobal->primary_color ?? '#4CAF50' }}; /* Exemple: rendre les couleurs dynamiques */
+            --secondary-color: {{ $siteSettingsGlobal->secondary_color ?? '#2E7D32' }};
+            /* ... autres variables ... */
+            --primary-color-rgb: {{ implode(',', sscanf($siteSettingsGlobal->primary_color ?? '#4CAF50', "#%02x%02x%02x")) }};
+            --secondary-color-rgb: {{ implode(',', sscanf($siteSettingsGlobal->secondary_color ?? '#2E7D32', "#%02x%02x%02x")) }};
+            --accent-color-rgb: {{ implode(',', sscanf($siteSettingsGlobal->accent_color ?? '#8BC34A', "#%02x%02x%02x")) }};
+
+
+            --text-color: #374151; 
+            --light-gray: #F1F8E9; 
+            --dark-gray: #4B5563; 
         }
         body {
-            font-family: 'Poppins', 'Cairo', sans-serif;
+            font-family: 'Poppins', 'Cairo', sans-serif; /* Cairo pour l'Arabe */
             color: var(--text-color);
             line-height: 1.6;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            background-color: #FAFAFA; /* Fond général du corps */
         }
         main {
             flex-grow: 1;
-        }
-        /* ... (le reste de tes styles globaux de la page home peuvent venir ici ou dans frontend.css) ... */
-         /* Navigation */
-        .navbar {
-            padding: 0.75rem 0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: padding 0.3s ease, box-shadow 0.3s ease; /* Transition pour padding et ombre */
+            padding-top: 2rem; /* Espace après la navbar sticky */
+            padding-bottom: 2rem; /* Espace avant le footer */
         }
         .navbar-brand img {
              transition: height 0.3s ease;
+             max-height: 45px; /* Taille max pour le logo */
         }
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: var(--primary-color) !important;
+        .navbar.scrolled .navbar-brand img {
+            max-height: 40px; /* Logo légèrement plus petit au scroll */
+        }
+        .navbar {
+            transition: all 0.3s ease;
+            padding: 1rem 0;
+            background-color: rgba(255, 255, 255, 0.98) !important; /* Fond initial */
+        }
+        .navbar.scrolled {
+            padding: 0.5rem 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         .nav-link {
+            position: relative;
             font-weight: 500;
             padding: 0.5rem 1rem !important;
-            position: relative;
+            margin: 0 0.2rem;
             transition: all 0.3s ease;
+            color: var(--dark-gray);
         }
-        .nav-link:before {
-            content: "";
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color) !important;
+        }
+        .nav-link:after {
+            content: '';
             position: absolute;
             width: 0;
             height: 2px;
-            bottom: 0;
-            left: 0;
+            bottom: -2px; /* Légèrement en dessous du texte */
+            left: 50%;
             background-color: var(--primary-color);
             transition: all 0.3s ease;
+            transform: translateX(-50%);
         }
-        [dir="rtl"] .nav-link:before {
+        .nav-link:hover:after,
+        .nav-link.active:after {
+            width: 70%; /* Soulignement partiel */
+        }
+        [dir="rtl"] .nav-link:after {
+            right: 50%;
             left: auto;
-            right: 0;
+            transform: translateX(50%);
         }
-        .nav-link:hover:before, .nav-link.active:before {
-            width: 100%;
-        }
-         /* Footer */
+        /* Footer styles */
         footer {
-            background-color: #F3F4F6; /* Un gris un peu plus foncé que --light-gray */
-            padding: 3rem 0 1.5rem;
-            margin-top: auto; /* Pour pousser le footer en bas si le contenu est court */
+            background-color: #fff; /* Fond blanc pour le footer */
+            padding-top: 4rem;
+            padding-bottom: 1.5rem; /* Moins de padding en bas */
+            border-top: 1px solid #E5E7EB; /* Bordure discrète */
+            margin-top: auto; /* Pousse le footer en bas */
         }
         .footer-heading {
+            font-size: 1.3rem;
             font-weight: 600;
             margin-bottom: 1.5rem;
-            color: var(--primary-color);
+            color: var(--secondary-color);
+            position: relative;
+            padding-bottom: 12px;
         }
+        .footer-heading:after {
+            content: '';
+            position: absolute;
+            width: 30px;
+            height: 2px;
+            background-color: var(--primary-color);
+            bottom: 0;
+            left: 0;
+        }
+        [dir="rtl"] .footer-heading:after {
+            right: 0;
+            left: auto;
+        }
+        .footer-links { list-style: none; padding-left:0; }
         .footer-links a {
-            display: block;
             color: var(--dark-gray);
-            margin-bottom: 0.75rem;
             text-decoration: none;
+            margin-bottom: 0.8rem;
+            transition: all 0.3s ease;
+            position: relative;
+            padding-left: 18px; /* Espace pour l'icône */
+            display: inline-block; /* Pour que le padding s'applique bien */
+        }
+        .footer-links a:before {
+            content: '\f105'; /* FontAwesome chevron-right */
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            left: 0;
+            color: var(--primary-color);
+            font-size: 0.9rem; /* Taille de l'icône */
+            line-height: inherit;
             transition: all 0.3s ease;
         }
         .footer-links a:hover {
             color: var(--primary-color);
-            padding-left: 5px;
+            padding-left: 22px; /* Décalage au survol */
         }
-        [dir="rtl"] .footer-links a:hover {
-            padding-right: 5px;
-            padding-left: 0;
+        .footer-links a:hover:before {
+            left: 5px; /* Mouvement de l'icône */
         }
-        .social-links {
-            display: flex;
-            gap: 1rem;
-        }
+        [dir="rtl"] .footer-links a { padding-left: 0; padding-right: 18px; }
+        [dir="rtl"] .footer-links a:before { content: '\f104'; /* FontAwesome chevron-left */ left:auto; right:0; }
+        [dir="rtl"] .footer-links a:hover { padding-left:0; padding-right: 22px; }
+        [dir="rtl"] .footer-links a:hover:before { right: 5px; left:auto; }
+
+        .social-links { display: flex; gap: 15px; padding-left:0; list-style:none; }
         .social-links a {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 40px;
             height: 40px;
-            background-color: white;
+            background-color: var(--light-gray);
+            color: var(--dark-gray);
             border-radius: 50%;
-            color: var(--primary-color);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
+            text-decoration: none;
+            font-size: 1.1rem;
         }
         .social-links a:hover {
             background-color: var(--primary-color);
             color: white;
-            transform: translateY(-3px);
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(var(--primary-color-rgb), 0.3);
+        }
+        footer address p {
+            margin-bottom: 0.8rem;
+            display: flex;
+            align-items: center;
+            color: var(--dark-gray);
+        }
+        footer address p i.fas { /* Cibler spécifiquement les icônes FA */
+            color: var(--primary-color);
+            width: 25px; /* Espace pour l'icône */
+            text-align: center;
         }
         .copyright {
-            text-align: center;
-            margin-top: 2rem;
+            margin-top: 3rem;
             padding-top: 1.5rem;
             border-top: 1px solid #E5E7EB;
             color: var(--dark-gray);
-        }
-
-        /* Animation classes (si tu les utilises globalement) */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease, transform 0.6s ease;
-        }
-        .fade-in.active {
-            opacity: 1;
-            transform: translateY(0);
+            text-align: center;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
     <div id="app">
-        {{-- Barre de navigation reprise de ta page home --}}
         <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top">
             <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    <img src="{{ asset('images/logo_nama.png') }}" alt="{{ config('app.name', 'Nama') }} Logo" style="height: 40px;">
+                <a class="navbar-brand" href="{{ route('frontend.home', ['locale' => app()->getLocale()]) }}">
+                    @if($siteSettingsGlobal->logo_path)
+                        <img src="{{ Storage::url($siteSettingsGlobal->logo_path) }}" alt="{{ $siteSettingsGlobal->getTranslation('site_name', app()->getLocale()) ?? config('app.name', 'Nama') }} Logo">
+                    @else
+                        {{ $siteSettingsGlobal->getTranslation('site_name', app()->getLocale()) ?? config('app.name', 'Nama') }}
+                    @endif
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav {{ app()->getLocale() == 'ar' ? 'ms-auto' : 'me-auto' }}">
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('frontend.home') ? 'active' : '' }}" href="{{ route('frontend.home') }}">{{ __('Accueil') }}</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('frontend.about') ? 'active' : '' }}" href="{{ route('frontend.about') }}">{{ __('À Propos') }}</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('frontend.projects.index') || request()->routeIs('frontend.projects.show') ? 'active' : '' }}" href="{{ route('frontend.projects.index') }}">{{ __('Projets') }}</a></li>
-                        <li class="nav-item"><a class="nav-link {{ request()->routeIs('frontend.posts.index') || request()->routeIs('frontend.posts.show') ? 'active' : '' }}" href="{{ route('frontend.posts.index') }}">{{ __('Actualités') }}</a></li>
-                        <li class="nav-item"><a class="nav-link" href="#">{{ __('Contact') }}</a></li> {{-- Pense à créer une route pour contact --}}
+                    {{-- Navigation Principale Dynamique --}}
+                    <ul class="navbar-nav {{ app()->getLocale() == 'ar' ? 'ms-auto' : 'me-auto' }} mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link {{ request()->routeIs('frontend.home') ? 'active' : '' }}" href="{{ route('frontend.home', ['locale' => app()->getLocale()]) }}">{{ __('Accueil') }}</a>
+                        </li>
+                        @if(isset($globalNavLinks) && $globalNavLinks->isNotEmpty())
+                            @foreach($globalNavLinks as $navLink)
+                                <li class="nav-item">
+                                    <a class="nav-link {{ Str::contains(request()->url(), $navLink->getTranslation('slug', app()->getLocale())) ? 'active' : '' }}"
+                                       href="{{ route('frontend.page.show', ['locale' => app()->getLocale(), 'slug' => $navLink->getTranslation('slug', app()->getLocale())]) }}">
+                                        {{ $navLink->getTranslation('title', app()->getLocale()) }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        @else
+                            {{-- Liens de fallback si $globalNavLinks n'est pas disponible ou vide --}}
+                            <li class="nav-item"><a class="nav-link {{ request()->routeIs('frontend.about') ? 'active' : '' }}" href="{{ route('frontend.about', ['locale' => app()->getLocale()]) }}">{{ __('À Propos') }}</a></li>
+                            <li class="nav-item"><a class="nav-link {{ request()->routeIs('frontend.projects.index') || request()->routeIs('frontend.projects.show') ? 'active' : '' }}" href="{{ route('frontend.projects.index', ['locale' => app()->getLocale()]) }}">{{ __('Projets') }}</a></li>
+                            <li class="nav-item"><a class="nav-link {{ request()->routeIs('frontend.posts.index') || request()->routeIs('frontend.posts.show') ? 'active' : '' }}" href="{{ route('frontend.posts.index', ['locale' => app()->getLocale()]) }}">{{ __('Actualités') }}</a></li>
+                            <li class="nav-item"><a class="nav-link {{ request()->routeIs('frontend.events.index') || request()->routeIs('frontend.events.show') ? 'active' : '' }}" href="{{ route('frontend.events.index', ['locale' => app()->getLocale()]) }}">{{ __('Événements') }}</a></li>
+                            {{-- Pensez à créer une route et une page pour Contact, ou à la rendre dynamique via le modèle Page --}}
+                            <li class="nav-item"><a class="nav-link" href="#">{{ __('Contact') }}</a></li>
+                        @endif
                     </ul>
 
+                    {{-- Sélecteur de langue et liens Auth --}}
                     <ul class="navbar-nav {{ app()->getLocale() == 'ar' ? 'me-auto' : 'ms-auto' }}">
                         <li class="nav-item dropdown">
                             <a id="navbarDropdownLang" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -180,40 +265,32 @@
                                 @if(app()->getLocale() == 'ar') العربية @endif
                             </a>
                             <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdownLang">
-                                <a class="dropdown-item {{ app()->getLocale() == 'en' ? 'active disabled' : '' }}" href="{{ url()->current() }}?lang=en">English</a>
-                                <a class="dropdown-item {{ app()->getLocale() == 'fr' ? 'active disabled' : '' }}" href="{{ url()->current() }}?lang=fr">Français</a>
-                                <a class="dropdown-item {{ app()->getLocale() == 'ar' ? 'active disabled' : '' }}" href="{{ url()->current() }}?lang=ar">العربية</a>
+                                <a class="dropdown-item @if(app()->getLocale() == 'en') active disabled @endif" href="{{ url()->current() }}?lang=en">English</a>
+                                <a class="dropdown-item @if(app()->getLocale() == 'fr') active disabled @endif" href="{{ url()->current() }}?lang=fr">Français</a>
+                                <a class="dropdown-item @if(app()->getLocale() == 'ar') active disabled @endif" href="{{ url()->current() }}?lang=ar">العربية</a>
                             </div>
                         </li>
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('login') }}">
-                                        <i class="fas fa-sign-in-alt me-1"></i> {{ __('Login') }}
-                                    </a>
+                                    <a class="nav-link" href="{{ route('login') }}"><i class="fas fa-sign-in-alt me-1"></i> {{ __('Login') }}</a>
                                 </li>
                             @endif
                             @if (Route::has('register'))
                                 <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">
-                                        <i class="fas fa-user-plus me-1"></i> {{ __('Register') }}
-                                    </a>
+                                    <a class="nav-link" href="{{ route('register') }}"><i class="fas fa-user-plus me-1"></i> {{ __('Register') }}</a>
                                 </li>
                             @endif
                         @else
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                                    <i class="fas fa-tachometer-alt me-1"></i> {{ __('Admin') }}
-                                </a>
+                                <a class="nav-link" href="{{ route('admin.dashboard') }}"><i class="fas fa-tachometer-alt me-1"></i> {{ __('Admin') }}</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('logout') }}"
                                    onclick="event.preventDefault(); document.getElementById('logout-form-frontend').submit();">
                                     <i class="fas fa-sign-out-alt me-1"></i> {{ __('Logout') }}
                                 </a>
-                                <form id="logout-form-frontend" action="{{ route('logout') }}" method="POST" class="d-none">
-                                    @csrf
-                                </form>
+                                <form id="logout-form-frontend" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
                             </li>
                         @endguest
                     </ul>
@@ -225,96 +302,118 @@
             @yield('content')
         </main>
 
-        {{-- Footer repris de ta page home --}}
         <footer>
             <div class="container">
                 <div class="row">
                     <div class="col-md-4 mb-4 mb-md-0">
-                        <h4 class="footer-heading">{{ config('app.name', 'Nama') }}</h4>
-                        <p>{{ __('Organisation dédiée à agir ensemble pour un avenir meilleur.') }}</p>
-                        <div class="social-links mt-4">
-                            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        @if($siteSettingsGlobal->footer_logo_path)
+                            <img src="{{ Storage::url($siteSettingsGlobal->footer_logo_path) }}" alt="{{ $siteSettingsGlobal->getTranslation('site_name', app()->getLocale()) }}" style="max-height: 50px; margin-bottom: 1rem;">
+                        @else
+                            <h4 class="footer-heading">{{ $siteSettingsGlobal->getTranslation('site_name', app()->getLocale()) ?? config('app.name', 'Nama') }}</h4>
+                        @endif
+                        <p class="mt-2">{{ $siteSettingsGlobal->getTranslation('footer_description', app()->getLocale()) }}</p>
+                        <div class="social-links mt-3">
+                            @if($siteSettingsGlobal->social_facebook_url)<a href="{{ $siteSettingsGlobal->social_facebook_url }}" target="_blank" rel="noopener" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>@endif
+                            @if($siteSettingsGlobal->social_twitter_url)<a href="{{ $siteSettingsGlobal->social_twitter_url }}" target="_blank" rel="noopener" aria-label="Twitter"><i class="fab fa-twitter"></i></a>@endif
+                            @if($siteSettingsGlobal->social_instagram_url)<a href="{{ $siteSettingsGlobal->social_instagram_url }}" target="_blank" rel="noopener" aria-label="Instagram"><i class="fab fa-instagram"></i></a>@endif
+                            @if($siteSettingsGlobal->social_linkedin_url)<a href="{{ $siteSettingsGlobal->social_linkedin_url }}" target="_blank" rel="noopener" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>@endif
+                            @if($siteSettingsGlobal->social_youtube_url)<a href="{{ $siteSettingsGlobal->social_youtube_url }}" target="_blank" rel="noopener" aria-label="YouTube"><i class="fab fa-youtube"></i></a>@endif
                         </div>
                     </div>
                     <div class="col-md-2 mb-4 mb-md-0">
                         <h4 class="footer-heading">{{ __('Navigation') }}</h4>
-                        <div class="footer-links">
-                            <a href="{{ route('frontend.home') }}">{{ __('Accueil') }}</a>
-                            <a href="{{ route('frontend.about') }}">{{ __('À Propos') }}</a>
-                            <a href="{{ route('frontend.projects.index') }}">{{ __('Projets') }}</a>
-                            <a href="{{ route('frontend.posts.index') }}">{{ __('Actualités') }}</a>
-                            <a href="#">{{ __('Contact') }}</a>
-                        </div>
+                        <ul class="footer-links">
+                            <li><a href="{{ route('frontend.home', ['locale' => app()->getLocale()]) }}">{{ __('Accueil') }}</a></li>
+                             @php
+                                $footerNavLinks = $globalNavLinks->where('show_in_footer_navigation', true)->sortBy('footer_navigation_order');
+                             @endphp
+                            @foreach($footerNavLinks as $link)
+                                <li><a href="{{ route('frontend.page.show', ['locale' => app()->getLocale(), 'slug' => $link->getTranslation('slug', app()->getLocale())]) }}">{{ $link->getTranslation('title', app()->getLocale()) }}</a></li>
+                            @endforeach
+                            {{-- Fallback si pas de liens dynamiques pour le footer --}}
+                             @if($footerNavLinks->isEmpty() && !$globalNavLinks->where('show_in_footer_navigation', true)->exists())
+                                <li><a href="{{ route('frontend.about', ['locale' => app()->getLocale()]) }}">{{ __('À Propos') }}</a></li>
+                                <li><a href="{{ route('frontend.projects.index', ['locale' => app()->getLocale()]) }}">{{ __('Projets') }}</a></li>
+                                <li><a href="{{ route('frontend.posts.index', ['locale' => app()->getLocale()]) }}">{{ __('Actualités') }}</a></li>
+                                <li><a href="#">{{ __('Contact') }}</a></li> {{-- Mettez la bonne route pour contact --}}
+                            @endif
+                        </ul>
                     </div>
                     <div class="col-md-3 mb-4 mb-md-0">
                         <h4 class="footer-heading">{{ __('Liens Utiles') }}</h4>
-                        <div class="footer-links">
-                            <a href="#">{{ __('Faire un don') }}</a>
-                            <a href="#">{{ __('Devenir bénévole') }}</a>
-                            <a href="#">{{ __('FAQ') }}</a>
-                            <a href="#">{{ __('Mentions légales') }}</a>
-                        </div>
+                        <ul class="footer-links">
+                             @php
+                                $footerUsefulLinks = $globalNavLinks->where('show_in_footer_useful_links', true)->sortBy('footer_useful_links_order');
+                             @endphp
+                            @foreach($footerUsefulLinks as $link)
+                                 <li><a href="{{ route('frontend.page.show', ['locale' => app()->getLocale(), 'slug' => $link->getTranslation('slug', app()->getLocale())]) }}">{{ $link->getTranslation('title', app()->getLocale()) }}</a></li>
+                            @endforeach
+                             {{-- Fallback ou liens fixes --}}
+                            @if($footerUsefulLinks->isEmpty())
+                                <li><a href="#">{{ __('Faire un don') }}</a></li>
+                                <li><a href="#">{{ __('Devenir bénévole') }}</a></li>
+                                <li><a href="#">{{ __('FAQ') }}</a></li>
+                                <li><a href="#">{{ __('Mentions légales') }}</a></li>
+                            @endif
+                        </ul>
                     </div>
                     <div class="col-md-3">
                         <h4 class="footer-heading">{{ __('Contact') }}</h4>
                         <address>
-                            <p><i class="fas fa-map-marker-alt me-2"></i> 123 Rue Principale, Ville</p>
-                            <p><i class="fas fa-phone me-2"></i> +123 456 7890</p>
-                            <p><i class="fas fa-envelope me-2"></i> contact@nama.org</p>
+                            @if($siteSettingsGlobal->contact_address)<p><i class="fas fa-map-marker-alt"></i> {{ $siteSettingsGlobal->getTranslation('contact_address', app()->getLocale()) }}</p>@endif
+                            @if($siteSettingsGlobal->contact_phone)<p><i class="fas fa-phone"></i> {{ $siteSettingsGlobal->contact_phone }}</p>@endif
+                            @if($siteSettingsGlobal->contact_email)<p><i class="fas fa-envelope"></i> <a href="mailto:{{ $siteSettingsGlobal->contact_email }}" class="text-decoration-none" style="color:var(--dark-gray);">{{ $siteSettingsGlobal->contact_email }}</a></p>@endif
                         </address>
+                        @if($siteSettingsGlobal->contact_map_iframe_url)
+                            <div class="mt-2" style="max-width:100%; overflow:hidden; border-radius: 8px;">
+                                <iframe src="{{ $siteSettingsGlobal->contact_map_iframe_url }}" width="100%" height="150" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            </div>
+                        @endif
                     </div>
                 </div>
                 <div class="copyright">
-                    <p>&copy; {{ date('Y') }} {{ config('app.name', 'Nama') }}. {{ __('Tous droits réservés.') }}</p>
+                    <p>&copy; {{ date('Y') }} {{ $siteSettingsGlobal->getTranslation('site_name', app()->getLocale()) ?? config('app.name', 'Nama') }}. {{ $siteSettingsGlobal->getTranslation('footer_copyright_text', app()->getLocale()) ?? __('Tous droits réservés.') }}</p>
                 </div>
             </div>
         </footer>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {{-- Ton frontend.js si tu en as un pour des scripts globaux frontend --}}
-    {{-- <script src="{{ asset('js/frontend.js') }}" defer></script>  --}}
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 
-    {{-- Scripts spécifiques à la page --}}
-    @stack('scripts_frontend')
-
-     <script>
-        // Script pour l'animation et le sticky navbar repris de ta page home
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const fadeElements = document.querySelectorAll('.fade-in');
-            const fadeInOnScroll = function() {
-                fadeElements.forEach(element => {
-                    const elementTop = element.getBoundingClientRect().top;
-                    const elementVisible = 150; 
-                    if (elementTop < window.innerHeight - elementVisible) {
-                        element.classList.add('active');
-                    }
-                });
-            };
-            window.addEventListener('scroll', fadeInOnScroll);
-            fadeInOnScroll();
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out-once', // plus fluide
+                once: true // animation une seule fois
+            });
 
             const navbar = document.querySelector('.navbar.sticky-top');
             if (navbar) {
-                const navbarOriginalPaddingTop = window.getComputedStyle(navbar).paddingTop;
-                const navbarOriginalPaddingBottom = window.getComputedStyle(navbar).paddingBottom;
-                
                 window.addEventListener('scroll', function() {
                     if (window.scrollY > 50) {
-                        navbar.style.paddingTop = '0.5rem';
-                        navbar.style.paddingBottom = '0.5rem';
-                        navbar.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                        navbar.classList.add('scrolled');
                     } else {
-                        navbar.style.paddingTop = navbarOriginalPaddingTop;
-                        navbar.style.paddingBottom = navbarOriginalPaddingBottom;
-                        navbar.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.05)';
+                        navbar.classList.remove('scrolled');
+                    }
+                });
+            }
+            // Gestion du dropdown de langue sur mobile pour qu'il ne sorte pas de l'écran
+            const langDropdown = document.querySelector('#navbarDropdownLang');
+            if(langDropdown) {
+                langDropdown.addEventListener('show.bs.dropdown', function () {
+                    if (window.innerWidth < 992) { // lg breakpoint
+                        const menu = this.nextElementSibling;
+                        menu.classList.remove('dropdown-menu-end');
+                    } else {
+                         const menu = this.nextElementSibling;
+                         menu.classList.add('dropdown-menu-end');
                     }
                 });
             }
         });
     </script>
+    @stack('scripts_frontend')
 </body>
 </html>

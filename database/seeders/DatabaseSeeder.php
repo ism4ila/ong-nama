@@ -15,13 +15,19 @@ class DatabaseSeeder extends Seeder
     {
         // L'ordre est important ici :
         $this->call([
-            UserSeeder::class,         // Créer les utilisateurs d'abord
-            CategorySeeder::class,     // Puis les catégories
-            ProjectSeeder::class,      // Ensuite les projets (indépendant pour l'instant)
-            EventSeeder::class,        // Les événements (indépendant)
-            PartnerSeeder::class,      // Les partenaires (indépendant)
-            PostSeeder::class,         // Les articles APRÈS Users et Categories
-            // MediaItemSeeder::class, // Ajoutez ceci plus tard si nécessaire
+            UserSeeder::class,
+            CategorySeeder::class, // Exemple
+            // PostSeeder::class,
+            // ProjectSeeder::class,
+            // EventSeeder::class,
+            // PartnerSeeder::class,
+            // TeamMemberSeeder::class,
+            // CommentSeeder::class,
+
+            // Nouveaux Seeders
+            HomePageSettingSeeder::class,
+            SiteSettingSeeder::class,
+            PageSeeder::class, // Mettez à jour ou ajoutez PageSeeder
         ]);
     }
 }

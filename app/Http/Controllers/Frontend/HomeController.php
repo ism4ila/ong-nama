@@ -3,11 +3,14 @@
 namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\Project;   // <-- Importer le modèle Project
-use App\Models\Post;      // <-- Importer le modèle Post
-use App\Models\Event;     // <-- Importer le modèle Event
-use App\Models\Partner;   // <-- Importer le modèle Partner
+use App\Models\Project;
+use App\Models\Post;
+use App\Models\Event;
+use App\Models\Partner;
+use App\Models\HomePageSetting; // <-- Ajouté
+
+// SiteSetting sera injecté par ViewComposer, donc pas besoin ici si ViewComposer est utilisé.
+// use App\Models\SiteSetting; 
 
 class HomeController extends Controller
 {
@@ -18,36 +21,44 @@ class HomeController extends Controller
      */
     public function index()
     {
-        // 1. Récupérer les derniers projets (par exemple, les 3 plus récents)
-        $latestProjects = Project::latest() // Tri par created_at descendant
-            ->take(3)       // Limiter à 3 résultats
-            ->get();      // Exécuter la requête
+        // Récupérer les derniers projets (par exemple, les 3 plus récents publiés)
+        $latestProjects = Project::where('status', 'published') // Assurez-vous d'avoir une colonne status ou is_published
+            ->latest('start_date') // ou 'created_at' selon votre logique de tri
+            ->take(3)
+            ->get();
 
-        // 2. Récupérer les derniers articles publiés (par exemple, les 3 plus récents)
-        $latestPosts = Post::where('status', 'published') // Ajout du filtre par statut si pertinent
+        // Récupérer les derniers articles publiés (par exemple, les 3 plus récents)
+        $latestPosts = Post::where('status', 'published')
             ->whereNotNull('published_at')
             ->where('published_at', '<=', now())
             ->latest('published_at')
             ->take(3)
             ->get();
 
-        // 3. Récupérer les prochains événements (par exemple, les 3 plus proches)
-        $upcomingEvents = Event::where('start_datetime', '>=', now()) // Événements futurs ou en cours
-            ->orderBy('start_datetime', 'asc')   // Tri par date de début ascendante
+        // Récupérer les prochains événements (par exemple, les 3 plus proches)
+        $upcomingEvents = Event::where('start_datetime', '>=', now())
+            ->orderBy('start_datetime', 'asc')
             ->take(3)
             ->get();
 
-        // 4. Récupérer les partenaires (par exemple, tous, triés par ordre d'affichage)
-        $partners = Partner::orderBy('display_order', 'asc') // Tri par display_order
-            ->get();
+        // Récupérer les partenaires (par exemple, tous, triés par ordre d'affichage)
+        $partners = Partner::orderBy('display_order', 'asc')->get();
+        
+        // Récupérer les paramètres spécifiques à la page d'accueil
+        $homePageSettings = HomePageSetting::instance();
+        
+        // Les SiteSettings (logo, infos footer, etc.) sont généralement rendus disponibles globalement
+        // via un ViewComposer (voir étape 11). Si vous n'utilisez pas de ViewComposer pour cela,
+        // vous devriez les charger ici :
+        // $siteSettings = SiteSetting::instance();
 
-        // 5. Passer toutes les données récupérées à la vue
         return view('frontend.home', compact(
             'latestProjects',
             'latestPosts',
             'upcomingEvents',
-            'partners'
-            // Ajoutez d'autres variables si nécessaire
+            'partners',
+            'homePageSettings' // Passer les paramètres de la page d'accueil à la vue
+            // 'siteSettings' // Décommentez si vous ne passez pas par un ViewComposer
         ));
     }
 }

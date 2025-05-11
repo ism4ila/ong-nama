@@ -13,12 +13,27 @@ return new class extends Migration
     {
         Schema::create('pages', function (Blueprint $table) {
             $table->id();
-            $table->string('slug')->unique(); // Pour identifier la page, ex: 'about', 'home-what-we-do'
-            $table->json('title');           // Titre traduisible
-            $table->json('content')->nullable();       // Contenu principal traduisible
-            $table->json('meta_title')->nullable();    // Pour le SEO, traduisible
-            $table->json('meta_description')->nullable(); // Pour le SEO, traduisible
-            $table->boolean('is_published')->default(true);
+            $table->json('title'); // Translatable title
+            $table->json('slug');  // Translatable slug
+            $table->json('body');  // Translatable body
+            $table->boolean('is_published')->default(false);
+
+            // Champs méta traduisibles (corrigés en JSON)
+            $table->json('meta_title')->nullable();
+            $table->json('meta_description')->nullable();
+            $table->json('meta_keywords')->nullable();
+
+            // Nouveaux champs pour la navigation
+            $table->boolean('show_in_navbar')->default(false);
+            $table->integer('navbar_order')->nullable()->default(0);
+
+            // Nouveaux champs pour les liens de pied de page (optionnel, alternative à un modèle FooterLink)
+            $table->boolean('show_in_footer_useful_links')->default(false);
+            $table->integer('footer_useful_links_order')->nullable()->default(0);
+            $table->boolean('show_in_footer_navigation')->default(false); // Si vous voulez une section nav distincte en footer
+            $table->integer('footer_navigation_order')->nullable()->default(0);
+
+
             $table->timestamps();
         });
     }
